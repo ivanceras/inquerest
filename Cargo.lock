@@ -1,5 +1,5 @@
 [root]
-name = "inquirest"
+name = "inquerest"
 version = "0.0.1"
 dependencies = [
  "peg 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -42,8 +42,8 @@ pub enum Direction{
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub struct Order{
-    column: String,
-    direction: Direction,
+    pub column: String,
+    pub direction: Direction,
 }
 
 #[derive(Debug)]
@@ -73,9 +73,9 @@ pub struct Condition{
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub struct Filter{
-    connector: Option<Connector>,
-    condition: Condition,
-    subfilter: Vec<Filter>,
+    pub connector: Option<Connector>,
+    pub condition: Condition,
+    pub subfilter: Vec<Filter>,
 }
 
 #[derive(Debug)]

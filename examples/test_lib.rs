@@ -1,6 +1,6 @@
-extern crate inquirest;
+extern crate inquerest;
 
-use inquirest::*;
+use inquerest::*;
 
 fn main() {
 	println!("{:?}",operand("description"));
