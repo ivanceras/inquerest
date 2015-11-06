@@ -24,3 +24,8 @@ Inspired by [postgrest](https://github.com/begriffs/postgrest) [filter expressio
 ##Similar projects
 
 * [rustless/queryst](https://github.com/rustless/queryst)
+
+
+##TODO
+
+`GET /people?age=lt.13&(student=eq.true|gender=eq.M)&min(age)=gt.3&order_by=age.desc,height.asc&x=1234&group_by=avg(grade)`

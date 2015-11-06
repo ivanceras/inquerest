@@ -16,6 +16,7 @@ fn main() {
 	println!("not_in: {:?}",equality("not_in"));	
 	println!("is_not: {:?}",equality("is_not"));	
 	println!("like:{:?}",equality("like"));	
+	println!("function:{:?}",function("min(age)"));	
 	println!("condition:{:?}",condition("age=lt.13"));	
 	println!("condition:{:?}",condition("(age=lt.13)"));	
 	println!("direction:{:?}",direction("asc"));	

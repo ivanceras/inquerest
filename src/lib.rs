@@ -102,7 +102,8 @@ equation -> Equation
 
 #[pub]
 operand -> Operand
-	= c:name { Operand::Column(c) }
+	= f:function { Operand::Function(f) }
+	/ c:name { Operand::Column(c) }
 
 #[pub]
 function -> Function

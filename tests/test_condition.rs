@@ -94,3 +94,21 @@ fn test_lgee(){
 fn test_condition_equal(){
     assert_eq!(condition("age=lt.13"), condition("(age=lt.13)"))
 }
+
+
+
+#[test]
+fn test_function(){
+    assert_eq!(
+        Ok(Condition{
+                left: Operand::Function(
+                        Function{
+                            function: "min".to_owned(),
+                            params: vec![Operand::Column("grade".to_owned())], 
+                        }
+                    ),
+                equality: Equality::GTE,
+                right:Operand::Column("3".to_owned())
+            }),
+        condition("min(grade)=gte.3"));
+}

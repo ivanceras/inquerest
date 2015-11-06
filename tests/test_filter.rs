@@ -2,23 +2,6 @@ extern crate inquerest;
 
 use inquerest::*;
 
-/*
-fn main1(){ 
-    println!("\n filter1: {:?}",filter("student=eq.true"));
-	println!("\n filter1: {:?}",filter("(student=eq.true)"));
-	println!("\n filter1: {:?}",filter("((student=eq.true))"));
-	println!("\n filter2: {:?}",filter("student=eq.true|gender=eq.M"));
-	println!("\n filter2: {:?}",filter("(student=eq.true&age=lt.13)"));
-	println!("\n filter3: {:?}",filter("(student=eq.true)&(gender=eq.M)"));
-	println!("\n filter4: {:?}",filter("student=eq.true&student=eq.true"));
-	println!("\n filter4: {:?}",filter("student=eq.true&student=eq.true&age=lt.13"));
-	println!("\n filter5: {:?}",filter("(student=eq.true)|(student=eq.true)"));
-	println!("\n filter6: {:?}",filter("(student=eq.true)|(student=eq.true&age=lt.13)"));
-	println!("\n filter6: {:?}",filter("(student=eq.true|student=eq.true)&age=lt.13)"));
-	println!("\n filter7: {:#?}",filter("(student=eq.true)|(student=eq.true)&(age=lt.13)"));
-}
-*/
-
 #[test]
 fn test_simple(){
     assert_eq!(
@@ -226,6 +209,8 @@ fn or_and_filter(){
        ),
         filter("student=eq.true|age=lt.13&grade=gte.3"))
 }
+
+
 
 #[test]
 fn equal_filter(){
