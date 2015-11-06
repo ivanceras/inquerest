@@ -8,7 +8,7 @@ description = "url parameter parser for rest filter inquiry"
 readme = "README.md"
 repository = "https://github.com/ivanceras/inquerest"
 documentation = "https://ivanceras.github.io/inquerest/inquerest"
-keywords = ["url, param, parser, query, parameter"]
+keywords = ["url", "param", "parameter", "parser", "rest", "query", ]
 
 [dependencies]
 peg = "0.3.3"
