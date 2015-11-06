@@ -16,4 +16,4 @@ Query Param:
 `x = 1234`
 
 
-https://github.com/begriffs/postgrest/wiki/Routing
+Inspired by [postgrest](https://github.com/begriffs/postgrest) [filter expressions](https://github.com/begriffs/postgrest/wiki/Routing)
