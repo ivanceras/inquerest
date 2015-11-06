@@ -1,4 +1,4 @@
-## inquirest
+## inquerest
 
 
 
@@ -14,3 +14,6 @@ Order:
 
 Query Param:
 `x = 1234`
+
+
+https://github.com/begriffs/postgrest/wiki/Routing
