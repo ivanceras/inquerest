@@ -1,0 +1,77 @@
+use std::collections::HashMap;
+use std::borrow::{IntoCow, ToOwned, Cow};
+
+#[export]
+consonants
+    = ([a-z]![aeiou])+
+
+#[export]
+options -> Option<()>
+    = "abc" v:"def"? {v}
+
+number -> i64
+    = [0-9]+ { match_str.parse().unwrap() }
+
+#[export]
+list -> Vec<i64>
+    = number ** ","
+
+digit -> i64
+    = [0-9] { match_str.parse().unwrap() }
+
+#[export]
+repeat_n -> Vec<i64>
+    = digit{4}
+
+#[export]
+repeat_min -> Vec<i64>
+    = digit{2,}
+
+#[export]
+repeat_max -> Vec<i64>
+    = digit{,2}
+
+#[export]
+repeat_min_max -> Vec<i64>
+    = digit{2,3}
+
+#[export]
+boundaries -> String
+    = "foo" { match_str.to_string() }
+
+#[export]
+case_insensitive -> String
+    = "foo"i { match_str.to_string() }
+
+#[export]
+borrowed -> &'input str
+    = [a-z]+ { match_str }
+
+#[export]
+lifetime_parameter -> Cow<'input, str>
+    = [a-z]+ { match_str.into_cow() }
+    / "COW"  { "cow".to_owned().into_cow() }
+
+#[export]
+block -> &'input str
+    = [a-z]+ {
+        let result = match_str;
+        result
+    }
+
+#[export]
+keyvals -> HashMap<i64, i64>
+    = kvs:keyval ++ "\n" {
+        let mut rv = HashMap::new();
+        for &(k, v) in kvs.iter() {
+           rv.insert(k, v);
+        };
+        rv
+    }
+
+keyval -> (i64, i64)
+    = k:number ":" + v:number { (k, v) }
+
+#[export]
+expect_nothing -> ()
+    = [a-zA-Z]

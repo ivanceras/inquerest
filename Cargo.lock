@@ -1,0 +1,12 @@
+[root]
+name = "inquirest"
+version = "0.0.1"
+dependencies = [
+ "peg 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "peg"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
