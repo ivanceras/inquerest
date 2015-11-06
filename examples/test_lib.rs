@@ -3,7 +3,6 @@ extern crate inquirest;
 use inquirest::*;
 
 fn main() {
-	println!("{:?}",equation("lee=cesar"));
 	println!("{:?}",operand("description"));
 	println!("{:?}",function("sum(total)"));
 	println!("eq: {:?}",equality("eq"));
@@ -36,6 +35,10 @@ fn main() {
 	println!("\n filter5: {:?}",filter("(student=eq.true)|(student=eq.true)"));
 	println!("\n filter6: {:?}",filter("(student=eq.true)|(student=eq.true&age=lt.13)"));
 	println!("\n filter6: {:?}",filter("(student=eq.true|student=eq.true)&age=lt.13)"));
-	println!("\n filter7: {:?}",filter("(student=eq.true)|(student=eq.true)&(age=lt.13)"));
+	println!("\n filter7: {:#?}",filter("(student=eq.true)|(student=eq.true)&(age=lt.13)"));
 	println!("\n connector_condition: {:?}",connector_condition("&gender=eq.M"));
+	
+	assert_eq!(condition("age=lt.13"), condition("(age=lt.13)"))
+	
 }
+

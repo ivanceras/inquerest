@@ -1,5 +1,6 @@
 #![feature(plugin)]
 #![plugin(peg_syntax_ext)]
+
 pub use self::param::*;
 
 #[derive(Debug)]
@@ -211,10 +212,4 @@ connector_condition -> (Connector, Condition)
 connector_filter -> (Connector, Filter)
 	= con:connector rf:filter { (con, rf) }	
 "#);
-
-
-#[test]
-fn test_condition(){
-    assert_eq!(condition("age=lt.13"), condition("(age=lt.13)"))
-}
 

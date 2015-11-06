@@ -4,10 +4,6 @@ name = "inquirest"
 version = "0.0.1"
 authors = [ "Jovansonlee Cesar<ivanceras@gmail.com>" ]
 
-[[bin]]
-
-name = "inquirest"
-
 
 [dependencies]
 peg = "0.3.0"
