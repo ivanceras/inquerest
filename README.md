@@ -20,3 +20,7 @@ will resolve to
 
 
 Inspired by [postgrest](https://github.com/begriffs/postgrest) [filter expressions](https://github.com/begriffs/postgrest/wiki/Routing)
+
+##Similar projects
+
+* [rustless/queryst](https://github.com/rustless/queryst)
