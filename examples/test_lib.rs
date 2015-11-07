@@ -4,6 +4,8 @@ use inquerest::*;
 
 fn main() {
 	println!("{:?}",operand("description"));
+	println!("column name{:?}",column_name("description"));
+	println!("column name{:?}",column_name("product.description"));
 	println!("{:?}",function("sum(total)"));
 	println!("eq: {:?}",equality("eq"));
 	println!("neq: {:?}",equality("neq"));

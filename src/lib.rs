@@ -48,6 +48,11 @@ pub struct Order{
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+pub struct Group{
+    pub field: Operand,
+}
+#[derive(Debug)]
+#[derive(PartialEq)]
 pub enum Equality{
     EQ, // = ,
     NEQ, // != ,
@@ -94,7 +99,12 @@ use super::*;
 
 #[pub]
 name -> String
-  = [a-zA-Z0-9_]+ { match_str.to_string() }
+  	= [a-zA-Z0-9_]+ { match_str.to_string() }
+
+#[pub]
+column_name -> String
+	= t:name "." c:name { format!("{}.{}", t,c) } 
+	/ c:name { format!("{}", c) }
 
 #[pub]
 equation -> Equation
@@ -103,7 +113,7 @@ equation -> Equation
 #[pub]
 operand -> Operand
 	= f:function { Operand::Function(f) }
-	/ c:name { Operand::Column(c) }
+	/ c:column_name { Operand::Column(c) }
 
 #[pub]
 function -> Function
@@ -155,6 +165,20 @@ order -> Order
 	= c:name "." d:direction { Order{ column: c, direction: d} }
 
 #[pub]
+order_by -> Vec<Order>
+	= "order_by" "=" o:order++ "," {o}
+
+#[pub]
+group_by -> Vec<Group>
+	= "group_by" "=" flds:operand++ "," {
+		let mut groups = vec![];
+		for f in flds{
+			groups.push( Group { field:f } );
+		}
+		groups
+	}
+
+#[pub]
 connector -> Connector
 	= "&" { Connector::AND }
 	/ "|" { Connector::OR }
@@ -193,6 +217,8 @@ filter -> Filter
         	subfilter: sub_filters
         }
 	}
+
+
 
 #[pub]
 connector_condition -> (Connector, Condition)
