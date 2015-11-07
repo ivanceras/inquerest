@@ -1,6 +1,9 @@
 language: rust
 rust:
 - nightly
+- 1.5.0-nightly
+- stable
+- beta
 
 after_success: |
   sudo apt-get install libcurl4-openssl-dev libelf-dev libdw-dev &&
