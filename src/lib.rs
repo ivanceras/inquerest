@@ -178,19 +178,8 @@ filter -> Filter
     		subfilter: sub_filters
     	}
 	}
-	/ c: condition{
-		Filter{connector:None, condition:c, subfilter: vec![]}
-	}
-	
 	/ "(" f:filter ")" { 
 			f
-	}
-	/ lc:condition con:connector rf:filter {
-        Filter {
-        	connector: None,
-        	condition: lc,
-        	subfilter: vec![Filter{connector: Some(con), condition: rf.condition, subfilter: vec![]}]
-        }
 	}
 	/ lf:filter conn_fil:connector_filter* {
 		let mut sub_filters = vec![];

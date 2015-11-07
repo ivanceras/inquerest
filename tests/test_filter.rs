@@ -213,6 +213,44 @@ fn or_and_filter(){
 
 
 #[test]
+fn or_and_filter_with_function(){
+    assert_eq!(
+       Ok(
+           Filter { 
+               connector: None, 
+               condition: Condition { 
+                       left: Operand::Column("student".to_owned()), 
+                       equality: Equality::EQ, 
+                       right: Operand::Column("true".to_owned()) }, 
+                       subfilter: vec![
+                               Filter { 
+                                   connector: Some(Connector::OR), 
+                                   condition: Condition { 
+                                               left: Operand::Column("age".to_owned()), 
+                                               equality: Equality::LT, 
+                                               right: Operand::Column("13".to_owned()) 
+                                           }, 
+                                   subfilter: vec![] 
+                               },
+                               Filter { 
+                                   connector: Some(Connector::AND), 
+                                   condition: Condition { 
+                                           left:  Operand::Function(Function{
+                                                       function:"min".to_owned(),
+                                                       params: vec![Operand::Column("grade".to_owned())]
+                                                   }), 
+                                           equality: Equality::GTE, 
+                                           right:  Operand::Column("3".to_owned()) 
+                                       }, 
+                                   subfilter: vec![] 
+                               }
+                           ] 
+           }
+       ),
+        filter("student=eq.true|age=lt.13&min(grade)=gte.3"))
+}
+
+#[test]
 fn equal_filter(){
     assert_eq!(filter("student=eq.true"),filter("((student=eq.true))"))
 }
