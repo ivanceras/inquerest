@@ -304,9 +304,65 @@ query -> Query
 "#);
 
 
+#[test]
+fn test_column(){
+    assert_eq!(
+        Ok(Operand::Column("age".to_owned())),
+        operand("age"));
+}
 
 #[test]
-fn test_eq(){
+fn test_number(){
+    assert_eq!(
+        Ok(123),
+        number("123"));
+}
+
+
+#[test]
+fn test_table_column(){
+    assert_eq!(
+        Ok(Operand::Column("person.age".to_owned())),
+        operand("person.age"));
+}
+
+
+#[test]
+fn test_function(){
+    assert_eq!(
+        Ok(Function{
+            function: "min".to_owned(),
+            params: vec![Operand::Column("age".to_owned())], 
+        }),
+        function("min(age)"));
+}
+
+#[test]
+fn test_order(){
+    assert_eq!(
+        Ok(Order{
+            column: "age".to_owned(), 
+            direction: Direction::DESC, 
+        }),
+        order("age.desc"));
+}
+
+
+
+#[test]
+fn test_euqation(){
+    assert_eq!(
+        Ok(Equation { 
+                left: Operand::Column("x".to_owned()), 
+                right: Operand::Number(123) 
+            }),
+        equation("x=123"));
+}
+
+
+
+#[test]
+fn test_condition(){
     assert_eq!(
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
@@ -316,3 +372,16 @@ fn test_eq(){
         condition("age=eq.13"));
 }
 
+#[test]
+fn test_filter(){
+    assert_eq!(
+        Ok(Filter{
+                connector: None,
+                condition: Condition{left:Operand::Column("student".to_owned()),
+                                    equality:Equality::EQ,
+                                    right: Operand::Boolean(true)
+                            },
+                subfilter: vec![]
+                }),
+        filter("student=eq.true"))
+}
