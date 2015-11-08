@@ -4,6 +4,7 @@ use inquerest::*;
 
 fn main() {
 	println!("{:?}",operand("description"));
+	println!("{:?}",boolean("true"));
 	println!("column name{:?}",column_name("description"));
 	println!("column name{:?}",column_name("product.description"));
 	println!("{:?}",function("sum(total)"));
@@ -39,7 +40,6 @@ fn main() {
 	println!("\n filter6: {:?}",filter("(student=eq.true)|(student=eq.true&age=lt.13)"));
 	println!("\n filter6: {:?}",filter("(student=eq.true|student=eq.true)&age=lt.13)"));
 	println!("\n filter7: {:#?}",filter("(student=eq.true)|(student=eq.true)&(age=lt.13)"));
-	println!("\n connector_condition: {:?}",connector_condition("&gender=eq.M"));
 	
 	assert_eq!(condition("age=lt.13"), condition("(age=lt.13)"))
 	

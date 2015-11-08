@@ -41,3 +41,21 @@ params -> Params
  	 	/ "(" c:condition ")" { 
 			c
 	}
+ 	 	
+ 	 	#[pub]
+two_filters -> Filter
+ 	= lf: filter conn: connector rf: filter {
+ 		let mut f2 = rf;
+ 		f2.connector = Some(conn);
+ 		let mut f1 = lf;
+ 		f1.subfilter.push(f2);
+ 		f1
+ 	}
+#[pub]
+connector_condition -> (Connector, Condition)
+	= con:connector rc:condition { (con, rc) }	
+
+#[pub]
+connector_filter -> (Connector, Filter)
+	= con:connector rf:filter { (con, rf) }	
+

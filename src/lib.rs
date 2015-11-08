@@ -23,7 +23,7 @@ pub enum Operand{
     Column(String),
     Function(Function),
     Number(i64),
-    Vec(Vec<Operand>),
+    Boolean(bool)
 }
 
 #[derive(Debug)]
@@ -88,7 +88,9 @@ pub struct Params{
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Default)]
 pub struct Query{
+    pub from: Vec<Operand>,
     pub filters: Vec<Filter>,
     pub group_by: Vec<Operand>,
     pub having: Vec<Filter>,
@@ -111,6 +113,11 @@ number -> i64
 	= [0-9]+ { match_str.parse().unwrap() }
 
 #[pub]
+boolean -> bool
+	= "true" { true }
+	/ "false" { false }
+
+#[pub]
 column_name -> String
 	= t:name "." c:name { format!("{}.{}", t,c) } 
 	/ c:name { format!("{}", c) }
@@ -122,6 +129,7 @@ equation -> Equation
 #[pub]
 operand -> Operand
 	= f:function { Operand::Function(f) }
+	/ b:boolean { Operand::Boolean(b) }
 	/ n:number { Operand::Number(n) }
 	/ c:column_name { Operand::Column(c) }
 
@@ -176,9 +184,11 @@ order_by -> Vec<Order>
 
 #[pub]
 group_by -> Vec<Operand>
-	= "group_by" "=" fields:operand++ "," {
-		fields
-	}
+	= "group_by" "=" fields:operand++ "," { fields }
+
+#[pub]
+from -> Vec<Operand>
+	= "from" "=" from:operand++ "," { from }
 	
 #[pub]
 having -> Vec<Filter>
@@ -188,17 +198,14 @@ having -> Vec<Filter>
 page -> i64
 	= "page" "=" p:number { p }
 
-#[pub]
 and_page -> i64
 	= "&" ? p: page { p }
 
 
-#[pub]
 page_size -> i64
 	= "page_size" "=" ps:number { ps }		
 
 
-#[pub]
 and_page_size -> i64
 	= "&" ? ps: page_size { ps }
 
@@ -232,40 +239,19 @@ filter -> Filter
     	}
     }
     
-#[pub]
-two_filters -> Filter
- 	= lf: filter conn: connector rf: filter {
- 		let mut f2 = rf;
- 		f2.connector = Some(conn);
- 		let mut f1 = lf;
- 		f1.subfilter.push(f2);
- 		f1
- 	}
-#[pub]
-connector_condition -> (Connector, Condition)
-	= con:connector rc:condition { (con, rc) }	
 
-#[pub]
-connector_filter -> (Connector, Filter)
-	= con:connector rf:filter { (con, rf) }	
-
-#[pub]
 and_order_by -> Vec<Order>
 	=  "&"? o:order_by { o }
 
-#[pub]
 and_group_by -> Vec<Operand>
 	=  "&"? g:group_by { g }
 	
-#[pub]
 and_having -> Vec<Filter>
 	=  "&"? h:having { h }
 	
-#[pub]
 and_equations -> Vec<Equation>
 	=  "&"? e:equation ** "&" { e }
 
-#[pub]
 and_filters -> Vec<Filter>
 	=  "&"? f:filter { vec![f] }
 
@@ -287,7 +273,8 @@ params -> Params
 #[pub]
 query -> Query
  = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? p:and_page? ps: and_page_size? e:and_equations? {
- 	Query{ 
+ 	Query{  
+ 			from:vec![],
      		filters: match f{
      						Some(f)=> f,
      						None => vec![]

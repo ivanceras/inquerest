@@ -12,9 +12,7 @@ fn test_filters(){
                         Filter {
                             connector: None,
                             condition: Condition {
-                                left: Operand::Column(
-                                    "age".to_owned()
-                                ),
+                                left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
@@ -24,13 +22,9 @@ fn test_filters(){
                                         Connector::AND
                                     ),
                                     condition: Condition {
-                                        left: Operand::Column(
-                                            "student".to_owned()
-                                        ),
+                                        left: Operand::Column("student".to_owned()),
                                         equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "true".to_owned()
-                                        )
+                                        right: Operand::Boolean(true)
                                     },
                                     subfilter: vec![
                                         Filter {
@@ -38,13 +32,9 @@ fn test_filters(){
                                                 Connector::OR
                                             ),
                                             condition: Condition {
-                                                left: Operand::Column(
-                                                    "gender".to_owned()
-                                                ),
+                                                left: Operand::Column("gender".to_owned()),
                                                 equality: Equality::EQ,
-                                                right: Operand::Column(
-                                                    "M".to_owned()
-                                                )
+                                                right: Operand::Column("M".to_owned())
                                             },
                                             subfilter: vec![]
                                         }
@@ -74,9 +64,7 @@ fn test_filters_equations(){
                         Filter {
                             connector: None,
                             condition: Condition {
-                                left: Operand::Column(
-                                    "age".to_owned()
-                                ),
+                                left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
@@ -86,13 +74,9 @@ fn test_filters_equations(){
                                         Connector::AND
                                     ),
                                     condition: Condition {
-                                        left: Operand::Column(
-                                            "student".to_owned()
-                                        ),
+                                        left: Operand::Column("student".to_owned()),
                                         equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "true".to_owned()
-                                        )
+                                        right: Operand::Boolean(true)
                                     },
                                     subfilter: vec![
                                         Filter {
@@ -100,13 +84,9 @@ fn test_filters_equations(){
                                                 Connector::OR
                                             ),
                                             condition: Condition {
-                                                left: Operand::Column(
-                                                    "gender".to_owned()
-                                                ),
+                                                left: Operand::Column("gender".to_owned()),
                                                 equality: Equality::EQ,
-                                                right: Operand::Column(
-                                                    "M".to_owned()
-                                                )
+                                                right: Operand::Column("M".to_owned())
                                             },
                                             subfilter: vec![]
                                         }
@@ -137,9 +117,7 @@ fn test_filters_equations2(){
                         Filter {
                             connector: None,
                             condition: Condition {
-                                left: Operand::Column(
-                                    "age".to_owned()
-                                ),
+                                left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
@@ -149,13 +127,9 @@ fn test_filters_equations2(){
                                         Connector::AND
                                     ),
                                     condition: Condition {
-                                        left: Operand::Column(
-                                            "student".to_owned()
-                                        ),
+                                        left: Operand::Column("student".to_owned()),
                                         equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "true".to_owned()
-                                        )
+                                        right: Operand::Boolean(true)
                                     },
                                     subfilter: vec![
                                         Filter {
@@ -163,13 +137,9 @@ fn test_filters_equations2(){
                                                 Connector::OR
                                             ),
                                             condition: Condition {
-                                                left: Operand::Column(
-                                                    "gender".to_owned()
-                                                ),
+                                                left: Operand::Column("gender".to_owned()),
                                                 equality: Equality::EQ,
-                                                right: Operand::Column(
-                                                    "M".to_owned()
-                                                )
+                                                right: Operand::Column("M".to_owned())
                                             },
                                             subfilter: vec![]
                                         }
@@ -204,9 +174,7 @@ fn test_filters2_equations2(){
                         Filter {
                             connector: None,
                             condition: Condition {
-                                left: Operand::Column(
-                                    "age".to_owned()
-                                ),
+                                left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
@@ -216,13 +184,9 @@ fn test_filters2_equations2(){
                                         Connector::AND
                                     ),
                                     condition: Condition {
-                                        left: Operand::Column(
-                                            "student".to_owned()
-                                        ),
+                                        left: Operand::Column("student".to_owned()),
                                         equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "true".to_owned()
-                                        )
+                                        right: Operand::Boolean(true)
                                     },
                                     subfilter: vec![
                                         Filter {
@@ -230,21 +194,15 @@ fn test_filters2_equations2(){
                                                 Connector::OR
                                             ),
                                             condition: Condition {
-                                                left: Operand::Column(
-                                                    "gender".to_owned()
-                                                ),
+                                                left: Operand::Column("gender".to_owned()),
                                                 equality: Equality::EQ,
-                                                right: Operand::Column(
-                                                    "M".to_owned()
-                                                )
+                                                right: Operand::Column("M".to_owned())
                                             },
                                             subfilter: vec![
                                                     Filter {
                                                         connector: Some(Connector::AND),
                                                         condition: Condition {
-                                                            left: Operand::Column(
-                                                                "age".to_owned()
-                                                            ),
+                                                            left: Operand::Column("age".to_owned()),
                                                             equality: Equality::LT,
                                                             right: Operand::Number(13)
                                                         },
@@ -254,13 +212,9 @@ fn test_filters2_equations2(){
                                                                     Connector::AND
                                                                 ),
                                                                 condition: Condition {
-                                                                    left: Operand::Column(
-                                                                        "student".to_owned()
-                                                                    ),
+                                                                    left: Operand::Column("student".to_owned()),
                                                                     equality: Equality::EQ,
-                                                                    right: Operand::Column(
-                                                                        "true".to_owned()
-                                                                    )
+                                                                    right: Operand::Boolean(true)
                                                                 },
                                                                 subfilter: vec![
                                                                     Filter {
@@ -268,13 +222,9 @@ fn test_filters2_equations2(){
                                                                             Connector::OR
                                                                         ),
                                                                         condition: Condition {
-                                                                            left: Operand::Column(
-                                                                                "gender".to_owned()
-                                                                            ),
+                                                                            left: Operand::Column("gender".to_owned()),
                                                                             equality: Equality::EQ,
-                                                                            right: Operand::Column(
-                                                                                "M".to_owned()
-                                                                            )
+                                                                            right: Operand::Column("M".to_owned())
                                                                         },
                                                                         subfilter: vec![]
                                                                     }

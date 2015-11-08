@@ -27,3 +27,15 @@ Inspired by [postgrest](https://github.com/begriffs/postgrest) [filter expressio
 
 
 
+##TODO
+select=id,name,age,address,max(sum(grade))
+&from=student,person
+&left_join=school_student
+&on=school_student.id,student.id
+&on=school.id=school_student.id
+
+
+select=*
+&inner_join=school,student
+
+&using=school.id
