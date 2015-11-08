@@ -6,8 +6,8 @@ pub use self::param::*;
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub struct Equation{
-    left: Operand,
-    right: Operand
+    pub left: Operand,
+    pub right: Operand
 }
 
 #[derive(Debug)]
@@ -87,8 +87,8 @@ pub struct Filter{
 #[derive(PartialEq)]
 pub struct Params{
     pub filters: Vec<Filter>,
-    pub order_by: Vec<Order>,
     pub group_by: Vec<Group>,
+    pub order_by: Vec<Order>,
     pub equations: Vec<Equation>,
 }
 
@@ -218,22 +218,39 @@ connector_filter -> (Connector, Filter)
 
 #[pub]
 and_order_by -> Vec<Order>
-	=  "&" o:order_by { o }
-	
+	=  "&"? o:order_by { o }
+
+#[pub]
+and_group_by -> Vec<Group>
+	=  "&"? g:group_by { g }
+#[pub]
+and_equations -> Vec<Equation>
+	=  "&"? e:equation ** "&" { e }
+
+#[pub]
+and_filters -> Vec<Filter>
+	=  "&"? f:filter { vec![f] }
+
 #[pub]
 params -> Params
- = f:filter? o:and_order_by? {
+ = f:and_filters? g:and_group_by? o:and_order_by? e:and_equations? {
  	Params{ 
      		filters: match f{
-     						Some(f)=> vec![f],
+     						Some(f)=> f,
+     						None => vec![]
+ 						}, 
+     		group_by: match g{
+     						Some(g)=> g,
      						None => vec![]
  						}, 
      		order_by: match o{
      						Some(o)=> o,
      						None => vec![]
  						}, 
-     		group_by: vec![], 
-     		equations: vec![] 
+     		equations: match e{
+     						Some(e)=> e,
+     						None => vec![]
+ 						}, 
      	} 
  }
 "#);
