@@ -22,7 +22,7 @@ pub struct Function{
 pub enum Operand{
     Column(String),
     Function(Function),
-    Value(String),
+    Number(i64),
     Vec(Vec<Operand>),
 }
 
@@ -83,7 +83,7 @@ pub struct Filter{
 pub struct Params{
     pub filters: Vec<Filter>,
     pub group_by: Vec<Operand>,
-    pub having: Vec<Operand>,
+    pub having: Vec<Filter>,
     pub order_by: Vec<Order>,
     pub page: Option<u32>,
     pub page_size: Option<u32>,
@@ -100,6 +100,10 @@ name -> String
   	= [a-zA-Z0-9_]+ { match_str.to_string() }
 
 #[pub]
+number -> i64
+	= [0-9]+ { match_str.parse().unwrap() }
+
+#[pub]
 column_name -> String
 	= t:name "." c:name { format!("{}.{}", t,c) } 
 	/ c:name { format!("{}", c) }
@@ -111,6 +115,7 @@ equation -> Equation
 #[pub]
 operand -> Operand
 	= f:function { Operand::Function(f) }
+	/ n:number { Operand::Number(n) }
 	/ c:column_name { Operand::Column(c) }
 
 #[pub]
@@ -167,7 +172,11 @@ group_by -> Vec<Operand>
 	= "group_by" "=" fields:operand++ "," {
 		fields
 	}
-
+	
+#[pub]
+having -> Vec<Filter>
+	= "having" "=" f:filter { vec![f] }
+	
 #[pub]
 connector -> Connector
 	= "&" { Connector::AND }
@@ -187,6 +196,9 @@ filter -> Filter
     		subfilter: vec![rf]
     	}
     }
+    / "(" f:filter ")" { 
+			f
+	}
     / c: condition{
     	Filter{
     		connector: None,
@@ -194,10 +206,16 @@ filter -> Filter
     		subfilter: vec![]
     	}
     }
-    / "(" f:filter ")" { 
-			f
-	}
-
+    
+#[pub]
+two_filters -> Filter
+ 	= lf: filter conn: connector rf: filter {
+ 		let mut f2 = rf;
+ 		f2.connector = Some(conn);
+ 		let mut f1 = lf;
+ 		f1.subfilter.push(f2);
+ 		f1
+ 	}
 #[pub]
 connector_condition -> (Connector, Condition)
 	= con:connector rc:condition { (con, rc) }	
@@ -213,6 +231,11 @@ and_order_by -> Vec<Order>
 #[pub]
 and_group_by -> Vec<Operand>
 	=  "&"? g:group_by { g }
+	
+#[pub]
+and_having -> Vec<Filter>
+	=  "&"? h:having { h }
+	
 #[pub]
 and_equations -> Vec<Equation>
 	=  "&"? e:equation ** "&" { e }
@@ -223,7 +246,7 @@ and_filters -> Vec<Filter>
 
 #[pub]
 params -> Params
- = f:and_filters? g:and_group_by? o:and_order_by? e:and_equations? {
+ = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? e:and_equations? {
  	Params{ 
      		filters: match f{
      						Some(f)=> f,
@@ -233,7 +256,10 @@ params -> Params
      						Some(g)=> g,
      						None => vec![]
  						}, 
- 			having: vec![],
+ 			having: match h{
+ 					Some(h) => h,
+ 					None => vec![]
+ 			},
      		order_by: match o{
      						Some(o)=> o,
      						None => vec![]

@@ -16,9 +16,7 @@ fn test_filters(){
                                     "age".to_owned()
                                 ),
                                 equality: Equality::LT,
-                                right: Operand::Column(
-                                    "13".to_owned()
-                                )
+                                right: Operand::Number(13)
                             },
                             subfilter: vec![
                                 Filter {
@@ -82,9 +80,7 @@ fn test_filter_orderby(){
                                     "age".to_owned()
                                 ),
                                 equality: Equality::LT,
-                                right: Operand::Column(
-                                    "13".to_owned()
-                                )
+                                right: Operand::Number(13)
                             },
                             subfilter: vec![
                                 Filter {
@@ -151,9 +147,7 @@ fn test_filter_groupby_orderby(){
                                     "age".to_owned()
                                 ),
                                 equality: Equality::LT,
-                                right: Operand::Column(
-                                    "13".to_owned()
-                                )
+                                right: Operand::Number(13)
                             },
                             subfilter: vec![
                                 Filter {
@@ -231,9 +225,7 @@ fn test_equations_filter_groupby_orderby(){
                                     "age".to_owned()
                                 ),
                                 equality: Equality::LT,
-                                right: Operand::Column(
-                                    "13".to_owned()
-                                )
+                                right: Operand::Number(13)
                             },
                             subfilter: vec![
                                 Filter {
@@ -289,8 +281,8 @@ fn test_equations_filter_groupby_orderby(){
                     page: None,
                     page_size: None,
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Column("123".to_owned()) }, 
-                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Column("456".to_owned()) }]
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }]
                 }
             )
         
@@ -410,3 +402,98 @@ fn test_groupby_orderby(){
         
         , params("group_by=avg(grade),height&order_by=height.asc,grade.desc"));
 }
+
+
+
+
+
+#[test]
+fn test_equations_filter_groupby_having_orderby(){
+    assert_eq!(
+        	Ok(
+                Params {
+                    filters: vec![
+                        Filter {
+                            connector: None,
+                            condition: Condition {
+                                left: Operand::Column(
+                                    "age".to_owned()
+                                ),
+                                equality: Equality::LT,
+                                right: Operand::Number(13)
+                            },
+                            subfilter: vec![
+                                Filter {
+                                    connector: Some(
+                                        Connector::AND
+                                    ),
+                                    condition: Condition {
+                                        left: Operand::Column(
+                                            "student".to_owned()
+                                        ),
+                                        equality: Equality::EQ,
+                                        right: Operand::Column(
+                                            "true".to_owned()
+                                        )
+                                    },
+                                    subfilter: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::OR
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column(
+                                                    "gender".to_owned()
+                                                ),
+                                                equality: Equality::EQ,
+                                                right: Operand::Column(
+                                                    "M".to_owned()
+                                                )
+                                            },
+                                            subfilter: vec![]
+                                        }
+                                    ]
+                                },
+                                
+                            ]
+                        }
+                    ],
+                    order_by: vec![
+                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
+                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        ],
+                    group_by: vec![
+                        Operand::Function(
+                                    Function { 
+                                        function: "sum".to_owned(), 
+                                        params: vec![Operand::Column("age".to_owned())] 
+                                    }
+                            ), 
+                       Operand::Column("grade".to_owned()), 
+                       Operand::Column("gender".to_owned()) 
+                    ],
+                    having: vec![
+                            Filter { connector: None, 
+                                    condition: Condition { 
+                                        left: Operand::Function(
+                                                Function { 
+                                                    function: "min".to_owned(), 
+                                                    params: vec![Operand::Column("age".to_owned())] 
+                                                }), 
+                                        equality: Equality::GT, 
+                                        right: Operand::Number(13) 
+                                    }, 
+                                subfilter: vec![] 
+                            }
+                        ],
+                    page: None,
+                    page_size: None,
+                    equations: vec![
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }]
+                }
+            )
+        
+        , params("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&x=123&y=456"));
+}
+

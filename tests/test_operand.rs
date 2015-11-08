@@ -10,6 +10,13 @@ fn test_column(){
         operand("age"));
 }
 
+#[test]
+fn test_number(){
+    assert_eq!(
+        Ok(123),
+        number("123"));
+}
+
 
 #[test]
 fn test_table_column(){
