@@ -3,6 +3,7 @@
 [![Latest Version](https://img.shields.io/crates/v/inquerest.svg)](https://crates.io/crates/inquerest)
 [![Build Status](https://travis-ci.org/ivanceras/inquerest.svg?branch=master)](https://travis-ci.org/ivanceras/inquerest)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Build status](https://ci.appveyor.com/api/projects/status/gu8t6gc5uxjfakge/branch/master?svg=true)](https://ci.appveyor.com/project/ivanceras/inquerest/branch/master)
 
 A complex url parameter parser for rest filter queries
 
