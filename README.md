@@ -2,6 +2,7 @@
 
 [![Latest Version](https://img.shields.io/crates/v/inquerest.svg)](https://crates.io/crates/inquerest)
 [![Build Status](https://travis-ci.org/ivanceras/inquerest.svg?branch=master)](https://travis-ci.org/ivanceras/inquerest)
+[![Coverage Status](https://coveralls.io/repos/ivanceras/inquerest/badge.svg?branch=master&service=github)](https://coveralls.io/github/ivanceras/inquerest?branch=master)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Build status](https://ci.appveyor.com/api/projects/status/gu8t6gc5uxjfakge/branch/master?svg=true)](https://ci.appveyor.com/project/ivanceras/inquerest/branch/master)
 
