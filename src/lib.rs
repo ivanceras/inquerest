@@ -303,3 +303,16 @@ query -> Query
  }
 "#);
 
+
+
+#[test]
+fn test_eq(){
+    assert_eq!(
+        Ok(Condition{
+            left:Operand::Column("age".to_owned()), 
+            equality:Equality::EQ, 
+            right:Operand::Number(13)
+        }),
+        condition("age=eq.13"));
+}
+
