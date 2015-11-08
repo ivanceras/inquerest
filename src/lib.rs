@@ -148,10 +148,6 @@ condition -> Condition
 	= l:operand "=" eq:equality "." r:operand {
 		Condition{left: l, equality: eq, right: r}
 	}
-	/ "(" c:condition ")" { 
-			c
-	}
-	
 
 #[pub]
 direction -> Direction
@@ -179,28 +175,28 @@ connector -> Connector
 
 #[pub]
 filter -> Filter
-	= lc:condition cc:connector_condition* {
-		let mut sub_filters = vec![];
-		for (conn, cond) in cc{
-			let filter = Filter{ 
-							connector: Some(conn), 
-							condition: cond, 
-							subfilter: vec![]
-						};
-			sub_filters.push(filter);
-		}
-		 
-    	Filter {
+    = c: condition conn: connector f: filter {
+    	let rf = Filter{
+    		connector:Some(conn),
+    		condition: f.condition,
+    		subfilter: f.subfilter
+    	};
+		Filter{
     		connector: None,
-    		condition:lc,
-    		subfilter: sub_filters
+    		condition: c,
+    		subfilter: vec![rf]
     	}
-	}
-	/ "(" f:filter ")" { 
+    }
+    / c: condition{
+    	Filter{
+    		connector: None,
+    		condition: c,
+    		subfilter: vec![]
+    	}
+    }
+    / "(" f:filter ")" { 
 			f
 	}
-
-
 
 #[pub]
 connector_condition -> (Connector, Condition)

@@ -34,23 +34,25 @@ fn test_filters(){
                                             "true".to_owned()
                                         )
                                     },
-                                    subfilter: vec![]
+                                    subfilter: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::OR
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column(
+                                                    "gender".to_owned()
+                                                ),
+                                                equality: Equality::EQ,
+                                                right: Operand::Column(
+                                                    "M".to_owned()
+                                                )
+                                            },
+                                            subfilter: vec![]
+                                        }
+                                    ]
                                 },
-                                Filter {
-                                    connector: Some(
-                                        Connector::OR
-                                    ),
-                                    condition: Condition {
-                                        left: Operand::Column(
-                                            "gender".to_owned()
-                                        ),
-                                        equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "M".to_owned()
-                                        )
-                                    },
-                                    subfilter: vec![]
-                                }
+                                
                             ]
                         }
                     ],
@@ -63,7 +65,7 @@ fn test_filters(){
                 }
             )
         
-        , params("(age=lt.13)&(student=eq.true)|(gender=eq.M)"));
+        , params("age=lt.13&student=eq.true|gender=eq.M"));
 }
 
 
@@ -98,23 +100,25 @@ fn test_filter_orderby(){
                                             "true".to_owned()
                                         )
                                     },
-                                    subfilter: vec![]
+                                    subfilter: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::OR
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column(
+                                                    "gender".to_owned()
+                                                ),
+                                                equality: Equality::EQ,
+                                                right: Operand::Column(
+                                                    "M".to_owned()
+                                                )
+                                            },
+                                            subfilter: vec![]
+                                        }
+                                    ]
                                 },
-                                Filter {
-                                    connector: Some(
-                                        Connector::OR
-                                    ),
-                                    condition: Condition {
-                                        left: Operand::Column(
-                                            "gender".to_owned()
-                                        ),
-                                        equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "M".to_owned()
-                                        )
-                                    },
-                                    subfilter: vec![]
-                                }
+                                
                             ]
                         }
                     ],
@@ -130,7 +134,7 @@ fn test_filter_orderby(){
                 }
             )
         
-        , params("(age=lt.13)&(student=eq.true)|(gender=eq.M)&order_by=age.desc,height.asc"));
+        , params("age=lt.13&(student=eq.true|gender=eq.M)&order_by=age.desc,height.asc"));
 }
 
 
@@ -165,23 +169,25 @@ fn test_filter_groupby_orderby(){
                                             "true".to_owned()
                                         )
                                     },
-                                    subfilter: vec![]
+                                    subfilter: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::OR
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column(
+                                                    "gender".to_owned()
+                                                ),
+                                                equality: Equality::EQ,
+                                                right: Operand::Column(
+                                                    "M".to_owned()
+                                                )
+                                            },
+                                            subfilter: vec![]
+                                        }
+                                    ]
                                 },
-                                Filter {
-                                    connector: Some(
-                                        Connector::OR
-                                    ),
-                                    condition: Condition {
-                                        left: Operand::Column(
-                                            "gender".to_owned()
-                                        ),
-                                        equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "M".to_owned()
-                                        )
-                                    },
-                                    subfilter: vec![]
-                                }
+                                
                             ]
                         }
                     ],
@@ -206,7 +212,7 @@ fn test_filter_groupby_orderby(){
                 }
             )
         
-        , params("(age=lt.13)&(student=eq.true)|(gender=eq.M)&group_by=sum(age),grade,gender&order_by=age.desc,height.asc"));
+        , params("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&order_by=age.desc,height.asc"));
 }
 
 
@@ -243,23 +249,25 @@ fn test_equations_filter_groupby_orderby(){
                                             "true".to_owned()
                                         )
                                     },
-                                    subfilter: vec![]
+                                    subfilter: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::OR
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column(
+                                                    "gender".to_owned()
+                                                ),
+                                                equality: Equality::EQ,
+                                                right: Operand::Column(
+                                                    "M".to_owned()
+                                                )
+                                            },
+                                            subfilter: vec![]
+                                        }
+                                    ]
                                 },
-                                Filter {
-                                    connector: Some(
-                                        Connector::OR
-                                    ),
-                                    condition: Condition {
-                                        left: Operand::Column(
-                                            "gender".to_owned()
-                                        ),
-                                        equality: Equality::EQ,
-                                        right: Operand::Column(
-                                            "M".to_owned()
-                                        )
-                                    },
-                                    subfilter: vec![]
-                                }
+                                
                             ]
                         }
                     ],
@@ -286,7 +294,7 @@ fn test_equations_filter_groupby_orderby(){
                 }
             )
         
-        , params("(age=lt.13)&(student=eq.true)|(gender=eq.M)&group_by=sum(age),grade,gender&order_by=age.desc,height.asc&x=123&y=456"));
+        , params("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&order_by=age.desc,height.asc&x=123&y=456"));
 }
 
 

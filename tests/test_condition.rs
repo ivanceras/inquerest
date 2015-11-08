@@ -90,12 +90,6 @@ fn test_lgee(){
         condition("age=gtee.13"));
 }
 
-#[test]
-fn test_condition_equal(){
-    assert_eq!(condition("age=lt.13"), condition("(age=lt.13)"))
-}
-
-
 
 #[test]
 fn test_function(){
