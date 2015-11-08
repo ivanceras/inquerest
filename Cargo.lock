@@ -2,11 +2,11 @@
 name = "inquerest"
 version = "0.0.1"
 dependencies = [
- "peg 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "peg 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "peg"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 

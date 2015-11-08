@@ -11,4 +11,4 @@ documentation = "https://ivanceras.github.io/inquerest/inquerest"
 keywords = ["url", "param", "parser", "rest", "query", ]
 
 [dependencies]
-peg = "0.3.3"
+peg = "0.3.4"
