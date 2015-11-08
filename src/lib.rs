@@ -85,8 +85,8 @@ pub struct Params{
     pub group_by: Vec<Operand>,
     pub having: Vec<Filter>,
     pub order_by: Vec<Order>,
-    pub page: Option<u32>,
-    pub page_size: Option<u32>,
+    pub page: Option<i64>,
+    pub page_size: Option<i64>,
     pub equations: Vec<Equation>,
 }
 
@@ -176,7 +176,25 @@ group_by -> Vec<Operand>
 #[pub]
 having -> Vec<Filter>
 	= "having" "=" f:filter { vec![f] }
-	
+
+#[pub]
+page -> i64
+	= "page" "=" p:number { p }
+
+#[pub]
+and_page -> i64
+	= "&" ? p: page { p }
+
+
+#[pub]
+page_size -> i64
+	= "page_size" "=" ps:number { ps }		
+
+
+#[pub]
+and_page_size -> i64
+	= "&" ? ps: page_size { ps }
+
 #[pub]
 connector -> Connector
 	= "&" { Connector::AND }
@@ -246,7 +264,7 @@ and_filters -> Vec<Filter>
 
 #[pub]
 params -> Params
- = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? e:and_equations? {
+ = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? p:and_page? ps: and_page_size? e:and_equations? {
  	Params{ 
      		filters: match f{
      						Some(f)=> f,
@@ -264,8 +282,8 @@ params -> Params
      						Some(o)=> o,
      						None => vec![]
  						},
- 			page: None,
- 			page_size: None,
+ 			page: p,
+ 			page_size: ps,
      		equations: match e{
      						Some(e)=> e,
      						None => vec![]
