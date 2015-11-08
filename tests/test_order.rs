@@ -48,3 +48,23 @@ fn test_order_by2(){
             ]),
         order_by("order_by=age.asc,grade.desc"));
 }
+
+
+#[test]
+fn test_order_by3(){
+    assert_eq!(
+        Ok(vec![Order{
+                column: "age".to_owned(), 
+                direction: Direction::DESC, 
+            },
+            Order{
+                column: "grade".to_owned(), 
+                direction: Direction::DESC, 
+            },
+            Order{
+                column: "height".to_owned(), 
+                direction: Direction::ASC, 
+            }
+            ]),
+        order_by("order_by=age.desc,grade.desc,height.asc"));
+}
