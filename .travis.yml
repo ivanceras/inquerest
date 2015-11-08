@@ -2,6 +2,9 @@ language: rust
 rust:
 - nightly
 
+script:
+- cargo test
+
 after_success: |
   sudo apt-get install libcurl4-openssl-dev libelf-dev libdw-dev &&
   wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
@@ -9,5 +12,4 @@ after_success: |
   sudo make install && cd ../.. &&
   kcov --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/inquerest-*
   
-script:
-- cargo test
+
