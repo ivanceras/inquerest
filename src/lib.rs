@@ -303,12 +303,17 @@ query -> Query
  }
 "#);
 
-
 #[test]
-fn test_column(){
+fn test_boolean_true(){
     assert_eq!(
-        Ok(Operand::Column("age".to_owned())),
-        operand("age"));
+        Ok(true),
+        boolean("true"));
+}
+#[test]
+fn test_boolean_false(){
+    assert_eq!(
+        Ok(false),
+        boolean("false"));
 }
 
 #[test]
@@ -317,6 +322,22 @@ fn test_number(){
         Ok(123),
         number("123"));
 }
+
+#[test]
+fn test_name(){
+    assert_eq!(
+        Ok("age".to_owned()),
+        name("age"));
+}
+
+#[test]
+fn test_column(){
+    assert_eq!(
+        Ok(Operand::Column("age".to_owned())),
+        operand("age"));
+}
+
+
 
 
 #[test]
