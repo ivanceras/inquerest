@@ -82,6 +82,14 @@ pub struct Filter{
 #[derive(PartialEq)]
 pub struct Params{
     pub filters: Vec<Filter>,
+    pub equations: Vec<Equation>,
+}
+
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub struct Query{
+    pub filters: Vec<Filter>,
     pub group_by: Vec<Operand>,
     pub having: Vec<Filter>,
     pub order_by: Vec<Order>,
@@ -89,7 +97,6 @@ pub struct Params{
     pub page_size: Option<i64>,
     pub equations: Vec<Equation>,
 }
-
 
 peg! param(r#"
 use super::*;
@@ -266,6 +273,21 @@ and_filters -> Vec<Filter>
 params -> Params
  = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? p:and_page? ps: and_page_size? e:and_equations? {
  	Params{ 
+     		filters: match f{
+     						Some(f)=> f,
+     						None => vec![]
+ 						}, 
+     		equations: match e{
+     						Some(e)=> e,
+     						None => vec![]
+ 						}, 
+     	} 
+ }
+
+#[pub]
+query -> Query
+ = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? p:and_page? ps: and_page_size? e:and_equations? {
+ 	Query{ 
      		filters: match f{
      						Some(f)=> f,
      						None => vec![]
