@@ -1,10 +1,10 @@
 [package]
 
 name = "inquerest"
-version = "0.0.2"
+version = "0.0.3"
 authors = [ "Jovansonlee Cesar<ivanceras@gmail.com>" ]
 license = "MIT"
-description = "url parameter parser for rest filter inquiry"
+description = "complex url parameter parser for rest filter queries"
 readme = "README.md"
 repository = "https://github.com/ivanceras/inquerest"
 documentation = "https://ivanceras.github.io/inquerest/inquerest"

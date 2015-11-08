@@ -60,6 +60,7 @@ pub enum Equality{
     IS,// IS
     IS_NOT,// IS NOT 
     LIKE, // LIKE
+    ILIKE, // LIKE
 }
 
 #[derive(Debug)]
@@ -162,6 +163,7 @@ equality -> Equality
 			} 
 	}
     / "like"   { Equality::LIKE }
+    / "ilike"   { Equality::ILIKE }
 
 #[pub]
 condition -> Condition

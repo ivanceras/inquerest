@@ -2,21 +2,140 @@
 
 [![Build Status](https://travis-ci.org/ivanceras/inquerest.svg?branch=master)](https://travis-ci.org/ivanceras/inquerest)
 
-`GET /people?age=lt.13&(student=eq.true|gender=eq.M)&order=age.desc,height.asc&x=1234`
 
-will resolve to 
+```
+age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&page=20&page_size=100&x=123&y=456
 
-* Filters:
+```
+Will resolve into
 
-    `age < 13 AND (student = TRUE OR gender = 'M')`
- 
-* Order by:
+```rust
+Query {
+        from: [],
+        filters: [
+            Filter {
+                connector: None,
+                condition: Condition {
+                    left: Column(
+                        "age"
+                    ),
+                    equality: LT,
+                    right: Number(
+                        13
+                    )
+                },
+                subfilter: [
+                    Filter {
+                        connector: Some(
+                            AND
+                        ),
+                        condition: Condition {
+                            left: Column(
+                                "student"
+                            ),
+                            equality: EQ,
+                            right: Boolean(
+                                true
+                            )
+                        },
+                        subfilter: [
+                            Filter {
+                                connector: Some(
+                                    OR
+                                ),
+                                condition: Condition {
+                                    left: Column(
+                                        "gender"
+                                    ),
+                                    equality: EQ,
+                                    right: Column(
+                                        "M"
+                                    )
+                                },
+                                subfilter: []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        group_by: [
+            Function(
+                Function {
+                    function: "sum",
+                    params: [
+                        Column(
+                            "age"
+                        )
+                    ]
+                }
+            ),
+            Column(
+                "grade"
+            ),
+            Column(
+                "gender"
+            )
+        ],
+        having: [
+            Filter {
+                connector: None,
+                condition: Condition {
+                    left: Function(
+                        Function {
+                            function: "min",
+                            params: [
+                                Column(
+                                    "age"
+                                )
+                            ]
+                        }
+                    ),
+                    equality: GT,
+                    right: Number(
+                        13
+                    )
+                },
+                subfilter: []
+            }
+        ],
+        order_by: [
+            Order {
+                column: "age",
+                direction: DESC
+            },
+            Order {
+                column: "height",
+                direction: ASC
+            }
+        ],
+        page: Some(
+            20
+        ),
+        page_size: Some(
+            100
+        ),
+        equations: [
+            Equation {
+                left: Column(
+                    "x"
+                ),
+                right: Number(
+                    123
+                )
+            },
+            Equation {
+                left: Column(
+                    "y"
+                ),
+                right: Number(
+                    456
+                )
+            }
+        ]
+    }
 
-    `age DESC, height ASC`
-
-* other params:
-
-    `x = 1234`
+```
 
 
 Inspired by [postgrest](https://github.com/begriffs/postgrest) [filter expressions](https://github.com/begriffs/postgrest/wiki/Routing)
@@ -25,17 +144,3 @@ Inspired by [postgrest](https://github.com/begriffs/postgrest) [filter expressio
 
 * [rustless/queryst](https://github.com/rustless/queryst)
 
-
-
-##TODO
-select=id,name,age,address,max(sum(grade))
-&from=student,person
-&left_join=school_student
-&on=school_student.id,student.id
-&on=school.id=school_student.id
-
-
-select=*
-&inner_join=school,student
-
-&using=school.id
