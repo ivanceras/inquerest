@@ -56,6 +56,9 @@ fn test_filters(){
                     ],
                     order_by: vec![],
                     group_by: vec![],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )
@@ -120,6 +123,9 @@ fn test_filter_orderby(){
                         Order { column: "height".to_owned(), direction: Direction::ASC }
                         ],
                     group_by: vec![],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )
@@ -184,15 +190,18 @@ fn test_filter_groupby_orderby(){
                         Order { column: "height".to_owned(), direction: Direction::ASC }
                         ],
                     group_by: vec![
-                        Group { field: Operand::Function(
+                            Operand::Function(
                                     Function { 
                                         function: "sum".to_owned(), 
                                         params: vec![Operand::Column("age".to_owned())] 
                                     }) 
-                        }, 
-                        Group { field: Operand::Column("grade".to_owned()) }, 
-                        Group { field: Operand::Column("gender".to_owned()) }
+                            , 
+                            Operand::Column("grade".to_owned()), 
+                            Operand::Column("gender".to_owned())
                     ],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )
@@ -259,15 +268,18 @@ fn test_equations_filter_groupby_orderby(){
                         Order { column: "height".to_owned(), direction: Direction::ASC }
                         ],
                     group_by: vec![
-                        Group { field: Operand::Function(
+                        Operand::Function(
                                     Function { 
                                         function: "sum".to_owned(), 
                                         params: vec![Operand::Column("age".to_owned())] 
-                                    }) 
-                        }, 
-                        Group { field: Operand::Column("grade".to_owned()) }, 
-                        Group { field: Operand::Column("gender".to_owned()) }
+                                    }
+                            ), 
+                       Operand::Column("grade".to_owned()), 
+                       Operand::Column("gender".to_owned()) 
                     ],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![
                         Equation { left: Operand::Column("x".to_owned()), right: Operand::Column("123".to_owned()) }, 
                         Equation { left: Operand::Column("y".to_owned()), right: Operand::Column("456".to_owned()) }]
@@ -289,6 +301,9 @@ fn test_orderby(){
                         Order { column: "height".to_owned(), direction: Direction::ASC }
                         ],
                     group_by: vec![],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )
@@ -306,6 +321,9 @@ fn test_orderby2(){
                         Order { column: "grade".to_owned(), direction: Direction::DESC }
                         ],
                     group_by: vec![],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )
@@ -321,7 +339,10 @@ fn test_groupby(){
                 Params {
                     filters: vec![],
                     order_by: vec![],
-                    group_by: vec![Group { field: Operand::Column("height".to_owned()) }],
+                    group_by: vec![Operand::Column("height".to_owned())],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )
@@ -337,13 +358,15 @@ fn test_groupby2(){
                     filters: vec![],
                     order_by: vec![],
                     group_by: vec![
-                        Group { field: Operand::Function(Function { 
-                                                            function: "avg".to_owned(), 
-                                                            params: vec![Operand::Column("grade".to_owned())] 
-                                                        }) 
-                                },
-                        Group { field: Operand::Column("height".to_owned()) }
+                        Operand::Function(Function { 
+                                            function: "avg".to_owned(), 
+                                            params: vec![Operand::Column("grade".to_owned())] 
+                                }), 
+                        Operand::Column("height".to_owned())
                     ],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )
@@ -364,13 +387,15 @@ fn test_groupby_orderby(){
                         Order { column: "grade".to_owned(), direction: Direction::DESC }
                         ],
                     group_by: vec![
-                        Group { field: Operand::Function(Function { 
-                                                            function: "avg".to_owned(), 
-                                                            params: vec![Operand::Column("grade".to_owned())] 
-                                                        }) 
-                                },
-                        Group { field: Operand::Column("height".to_owned()) }
+                       Operand::Function(Function { 
+                                    function: "avg".to_owned(), 
+                                    params: vec![Operand::Column("grade".to_owned())] 
+                                }),
+                        Operand::Column("height".to_owned())
                     ],
+                    having: vec![],
+                    page: None,
+                    page_size: None,
                     equations: vec![]
                 }
             )

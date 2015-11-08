@@ -48,11 +48,6 @@ pub struct Order{
 
 #[derive(Debug)]
 #[derive(PartialEq)]
-pub struct Group{
-    pub field: Operand,
-}
-#[derive(Debug)]
-#[derive(PartialEq)]
 pub enum Equality{
     EQ, // = ,
     NEQ, // != ,
@@ -87,8 +82,11 @@ pub struct Filter{
 #[derive(PartialEq)]
 pub struct Params{
     pub filters: Vec<Filter>,
-    pub group_by: Vec<Group>,
+    pub group_by: Vec<Operand>,
+    pub having: Vec<Operand>,
     pub order_by: Vec<Order>,
+    pub page: Option<u32>,
+    pub page_size: Option<u32>,
     pub equations: Vec<Equation>,
 }
 
@@ -169,13 +167,9 @@ order_by -> Vec<Order>
 	= "order_by" "=" o:order++ "," {o}
 
 #[pub]
-group_by -> Vec<Group>
-	= "group_by" "=" flds:operand++ "," {
-		let mut groups = vec![];
-		for f in flds{
-			groups.push( Group { field:f } );
-		}
-		groups
+group_by -> Vec<Operand>
+	= "group_by" "=" fields:operand++ "," {
+		fields
 	}
 
 #[pub]
@@ -221,7 +215,7 @@ and_order_by -> Vec<Order>
 	=  "&"? o:order_by { o }
 
 #[pub]
-and_group_by -> Vec<Group>
+and_group_by -> Vec<Operand>
 	=  "&"? g:group_by { g }
 #[pub]
 and_equations -> Vec<Equation>
@@ -243,10 +237,13 @@ params -> Params
      						Some(g)=> g,
      						None => vec![]
  						}, 
+ 			having: vec![],
      		order_by: match o{
      						Some(o)=> o,
      						None => vec![]
- 						}, 
+ 						},
+ 			page: None,
+ 			page_size: None,
      		equations: match e{
      						Some(e)=> e,
      						None => vec![]
