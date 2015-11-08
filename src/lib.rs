@@ -60,7 +60,7 @@ pub enum Equality{
     IS,// IS
     IS_NOT,// IS NOT 
     LIKE, // LIKE
-    ILIKE, // LIKE
+    ILIKE, // ILIKE case insensitive like, postgresql specific
 }
 
 #[derive(Debug)]
