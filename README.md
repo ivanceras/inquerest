@@ -101,8 +101,8 @@ Query {
 ```
 ## More examples in
 
-[examples](https://github.com/ivanceras/inquerest/tree/master/examples)
-[tests](https://github.com/ivanceras/inquerest/tree/master/tests)
+* [examples](https://github.com/ivanceras/inquerest/tree/master/examples)
+* [tests](https://github.com/ivanceras/inquerest/tree/master/tests)
 
 Inspired by [Postgrest](https://github.com/begriffs/postgrest)  [Filter expressions](https://github.com/begriffs/postgrest/wiki/Routing)
 
