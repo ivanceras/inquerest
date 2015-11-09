@@ -96,9 +96,31 @@ pub struct Query{
     pub group_by: Vec<Operand>,
     pub having: Vec<Filter>,
     pub order_by: Vec<Order>,
-    pub page: Option<i64>,
-    pub page_size: Option<i64>,
+    pub range: Option<Range>,
     pub equations: Vec<Equation>,
+}
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+#[derive(Default)]
+pub struct Page{
+    pub page: i64,
+    pub page_size: i64,
+}
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+#[derive(Default)]
+pub struct Limit{
+    pub limit: i64,
+    pub offset: Option<i64>,
+}
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub enum Range{
+    Page(Page),
+    Limit(Limit),
 }
 
 peg! param(r#"
@@ -200,16 +222,37 @@ having -> Vec<Filter>
 page -> i64
 	= "page" "=" p:number { p }
 
-and_page -> i64
-	= "&" ? p: page { p }
-
-
+#[pub]
 page_size -> i64
 	= "page_size" "=" ps:number { ps }		
 
-
 and_page_size -> i64
 	= "&" ? ps: page_size { ps }
+
+and_page -> i64
+	= "&" ? p: page { p }
+
+#[pub]
+limit -> i64
+	= "limit" "=" l:number { l }
+#[pub]
+offset -> i64
+	= "offset" "=" o:number { o }
+
+and_limit -> i64
+	= "&" l:limit { l }
+and_offset -> i64
+	= "&" o:offset { o }
+
+#[pub]
+range -> Range
+	= p:and_page ps:and_page_size {
+		Range::Page(Page{ page: p, page_size: ps})
+	}
+	/ l:and_limit o:and_offset? {
+		Range::Limit(Limit{ limit: l, offset: o})
+	}
+
 
 #[pub]
 connector -> Connector
@@ -274,7 +317,7 @@ params -> Params
 
 #[pub]
 query -> Query
- = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? p:and_page? ps: and_page_size? e:and_equations? {
+ = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? r:range? e:and_equations? {
  	Query{  
  			from:vec![],
      		filters: match f{
@@ -293,8 +336,7 @@ query -> Query
      						Some(o)=> o,
      						None => vec![]
  						},
- 			page: p,
- 			page_size: ps,
+ 			range: r,
      		equations: match e{
      						Some(e)=> e,
      						None => vec![]
