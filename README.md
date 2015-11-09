@@ -83,8 +83,9 @@ Query {
                 direction: ASC
             }
         ],
-        page: Some(20),
-        page_size: Some(100),
+        range: Some(Page( 
+			Page{ page: 20, page_size:100 } 
+		)),
         equations: [
             Equation {
                 left: Column("x"),
@@ -108,4 +109,3 @@ Inspired by [Postgrest](https://github.com/begriffs/postgrest)  [Filter expressi
 ##Similar projects
 
 * [rustless/queryst](https://github.com/rustless/queryst)
-
