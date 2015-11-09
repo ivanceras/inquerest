@@ -259,7 +259,7 @@ and_filters -> Vec<Filter>
 
 #[pub]
 params -> Params
- = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? p:and_page? ps: and_page_size? e:and_equations? {
+ = f:and_filters? e:and_equations? {
  	Params{ 
      		filters: match f{
      						Some(f)=> f,
