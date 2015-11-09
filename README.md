@@ -109,3 +109,4 @@ Inspired by [Postgrest](https://github.com/begriffs/postgrest)  [Filter expressi
 
 * [rustless/queryst](https://github.com/rustless/queryst)
 
+If you like this library, please consider supporting the project on [Gratipay](https://gratipay.com/~ivanceras/). 
