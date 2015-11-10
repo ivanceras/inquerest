@@ -59,3 +59,11 @@ connector_condition -> (Connector, Condition)
 connector_filter -> (Connector, Filter)
 	= con:connector rf:filter { (con, rf) }	
 
+
+modifier -> Modifier
+	= "left" -> { Modifer::LEFT }
+	/ "right" -> { Modifer::RIGHT }
+	/ "full" -> { Modifer::FULL }
+
+join_type-> JoinType 
+    = "inner" -> {JoinType::INNER}

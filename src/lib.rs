@@ -123,6 +123,33 @@ pub enum Range{
     Limit(Limit),
 }
 
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub enum JoinType {
+    CROSS,
+    INNER,
+    OUTER,
+    NATURAL,
+}
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub enum Modifier {
+    LEFT,
+    RIGHT,
+    FULL,
+}
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub struct Join {
+    pub modifier: Option<Modifier>,
+    pub join_type: Option<JoinType>,
+    pub table: Operand,
+    pub column1: Vec<String>,
+    pub column2: Vec<String>,
+}
+
 peg! param(r#"
 use super::*;
 
@@ -212,8 +239,52 @@ group_by -> Vec<Operand>
 
 #[pub]
 from -> Vec<Operand>
-	= "from" "=" from:operand++ "," { from }
-	
+	= "from" "=" fr:operand++ "," { fr }
+
+modifier -> Modifier
+	= "left"  { Modifier::LEFT }
+	/ "right" { Modifier::RIGHT }
+	/ "full"  { Modifier::FULL }
+
+join_type -> JoinType 
+    = "inner" { JoinType::INNER }
+    / "outer" { JoinType::OUTER }
+    / "cross" { JoinType::CROSS }
+    / "natural" { JoinType::NATURAL }
+
+modifier_join_type -> (Option<Modifier>, Option<JoinType>)
+ = m:modifier "_" jt:join_type { ( Some(m), Some(jt) ) }
+ / m:modifier  { ( Some(m), None ) }
+ / jt:join_type  { ( None, Some(jt) ) }
+
+#[pub]
+join -> Join
+ =  m_jt:modifier_join_type? "_"? "join" "=" t:operand on:and_on+ {
+ 	let mut columns1 = vec![];
+ 	let mut columns2 = vec![];
+ 	for (c1,c2) in on{
+ 		columns1.push(c1);
+ 		columns2.push(c2);	
+ 	}
+ 	let (m, jt) = match m_jt{
+ 		Some( m_jt ) => m_jt,
+ 		None => (None, None)
+ 	};
+ 	Join{
+ 		modifier: m,
+ 		join_type: jt,
+ 		table: t,
+ 		column1: columns1,
+ 		column2: columns2
+ 	}
+ }
+
+and_join -> Vec<Join>
+ = "&" j:join++"&" { j }
+ 
+and_on -> (String, String)
+ = "&on=" c1:column_name "=" c2:column_name { (c1, c2) }
+
 #[pub]
 having -> Vec<Filter>
 	= "having" "=" f:filter { vec![f] }
@@ -227,10 +298,10 @@ page_size -> i64
 	= "page_size" "=" ps:number { ps }		
 
 and_page_size -> i64
-	= "&" ? ps: page_size { ps }
+	= "&" ps: page_size { ps }
 
 and_page -> i64
-	= "&" ? p: page { p }
+	= "&"? p: page { p }
 
 #[pub]
 limit -> i64
@@ -240,7 +311,7 @@ offset -> i64
 	= "offset" "=" o:number { o }
 
 and_limit -> i64
-	= "&" l:limit { l }
+	= "&"?  l:limit { l }
 and_offset -> i64
 	= "&" o:offset { o }
 
@@ -317,7 +388,7 @@ params -> Params
 
 #[pub]
 query -> Query
- = f:and_filters? g:and_group_by? h:and_having? o:and_order_by? r:range? e:and_equations? {
+ = fr:from? j:and_join? f:and_filters? g:and_group_by? h:and_having? o:and_order_by? r:range? e:and_equations? {
  	Query{  
  			from:vec![],
      		filters: match f{
@@ -387,6 +458,56 @@ fn test_table_column(){
     assert_eq!(
         Ok(Operand::Column("person.age".to_owned())),
         operand("person.age"));
+}
+
+
+#[test]
+fn test_from(){
+    assert_eq!(
+        Ok(vec![Operand::Column("person".to_owned())]),
+        from("from=person"));
+}
+
+#[test]
+fn test_left_join(){
+    assert_eq!(
+        Ok(Join{
+                modifier: Some(Modifier::LEFT),
+                join_type: None,
+                table: Operand::Column("person".to_owned()),
+                column1: vec!["person.student_id".to_owned()],
+                column2: vec!["student.id".to_owned()],
+                }),
+        join("left_join=person&on=person.student_id=student.id"));
+}
+
+
+#[test]
+fn test_join(){
+    assert_eq!(
+        Ok(Join{
+                modifier: None,
+                join_type: None,
+                table: Operand::Column("bazaar.person".to_owned()),
+                column1: vec!["person.student_id".to_owned()],
+                column2: vec!["student.id".to_owned()],
+                }),
+        join("join=bazaar.person&on=person.student_id=student.id"));
+}
+
+
+#[test]
+#[should_panic]
+fn test_join_without_on(){
+    assert_eq!(
+        Ok(Join{
+                modifier: None,
+                join_type: None,
+                table: Operand::Column("bazaar.person".to_owned()),
+                column1: vec!["person.student_id".to_owned()],
+                column2: vec!["student.id".to_owned()],
+                }),
+        join("join=bazaar.person"));
 }
 
 

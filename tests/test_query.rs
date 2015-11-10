@@ -577,3 +577,89 @@ fn test_equations_filter_groupby_having_orderby_limit(){
         , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
 }
 
+
+
+
+
+
+#[test]
+fn test_equations_from_join_filter_groupby_having_orderby_limit(){
+    assert_eq!(
+        	Ok(
+                Query {
+                    filters: vec![
+                        Filter {
+                            connector: None,
+                            condition: Condition {
+                                left: Operand::Column("age".to_owned()),
+                                equality: Equality::LT,
+                                right: Operand::Number(13)
+                            },
+                            subfilter: vec![
+                                Filter {
+                                    connector: Some(
+                                        Connector::AND
+                                    ),
+                                    condition: Condition {
+                                        left: Operand::Column("student".to_owned()),
+                                        equality: Equality::EQ,
+                                        right: Operand::Boolean(true)
+                                    },
+                                    subfilter: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::OR
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column("gender".to_owned()),
+                                                equality: Equality::EQ,
+                                                right: Operand::Column("M".to_owned())
+                                            },
+                                            subfilter: vec![]
+                                        }
+                                    ]
+                                },
+                                
+                            ]
+                        }
+                    ],
+                    order_by: vec![
+                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
+                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        ],
+                    group_by: vec![
+                        Operand::Function(
+                                    Function { 
+                                        function: "sum".to_owned(), 
+                                        params: vec![Operand::Column("age".to_owned())] 
+                                    }
+                            ), 
+                       Operand::Column("grade".to_owned()), 
+                       Operand::Column("gender".to_owned()) 
+                    ],
+                    having: vec![
+                            Filter { connector: None, 
+                                    condition: Condition { 
+                                        left: Operand::Function(
+                                                Function { 
+                                                    function: "min".to_owned(), 
+                                                    params: vec![Operand::Column("age".to_owned())] 
+                                                }), 
+                                        equality: Equality::GT, 
+                                        right: Operand::Number(13) 
+                                    }, 
+                                subfilter: vec![] 
+                            }
+                        ],
+                    range: Some(Range::Limit( Limit{ limit: 100, offset: Some(25) } )),
+                    equations: vec![
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }
+                    ],
+                    ..Default::default()
+                }
+            )
+        
+        , query("from=bazaar.person,student&left_join=person_student&on=student.id=person.student_id&age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
+}
+
