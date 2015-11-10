@@ -584,9 +584,37 @@ fn test_equations_filter_groupby_having_orderby_limit(){
 
 #[test]
 fn test_equations_from_join_filter_groupby_having_orderby_limit(){
+    
+    println!("{:#?}",query("from=bazaar.person,student&left_join=person_student&on=student.id=person.student_id&age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
+    
     assert_eq!(
         	Ok(
                 Query {
+                    from: vec![
+                            Operand::Column(
+                                "bazaar.person".to_owned()
+                            ),
+                            Operand::Column(
+                                "student".to_owned()
+                            )
+                        ],
+                        join: vec![
+                            Join {
+                                modifier: Some(
+                                    Modifier::LEFT
+                                ),
+                                join_type: None,
+                                table: Operand::Column(
+                                    "person_student".to_owned()
+                                ),
+                                column1: vec![
+                                    "student.id".to_owned()
+                                ],
+                                column2: vec![
+                                    "person.student_id".to_owned()
+                                ]
+                            }
+                        ],
                     filters: vec![
                         Filter {
                             connector: None,

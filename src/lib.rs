@@ -92,6 +92,7 @@ pub struct Params{
 #[derive(Default)]
 pub struct Query{
     pub from: Vec<Operand>,
+    pub join: Vec<Join>,
     pub filters: Vec<Filter>,
     pub group_by: Vec<Operand>,
     pub having: Vec<Filter>,
@@ -390,7 +391,14 @@ params -> Params
 query -> Query
  = fr:from? j:and_join? f:and_filters? g:and_group_by? h:and_having? o:and_order_by? r:range? e:and_equations? {
  	Query{  
- 			from:vec![],
+ 			from: match fr{
+ 					Some(fr) => fr,
+ 					None => vec![]	
+ 				},
+ 			join: match j{
+     				Some(j) => j,
+     				None => vec![]
+     			},
      		filters: match f{
      						Some(f)=> f,
      						None => vec![]
