@@ -142,8 +142,8 @@ boolean -> bool
 
 #[pub]
 column_name -> String
-	= t:name "." c:name { format!("{}.{}", t,c) } 
-	/ c:name { format!("{}", c) }
+	= t:name "." d:!direction c:name { format!("{}.{}", t, c) }
+	/ c:name  { format!("{}", c) }
 
 #[pub]
 equation -> Equation
@@ -200,7 +200,7 @@ direction -> Direction
 
 #[pub]
 order -> Order
-	= c:name "." d:direction { Order{ column: c, direction: d} }
+	= c:column_name "." d:direction { Order{ column: c, direction: d} }
 
 #[pub]
 order_by -> Vec<Order>
