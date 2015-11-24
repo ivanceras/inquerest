@@ -16,7 +16,7 @@ fn test_filters(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -26,7 +26,7 @@ fn test_filters(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -36,7 +36,7 @@ fn test_filters(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -65,7 +65,7 @@ fn test_filter_orderby(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -75,7 +75,7 @@ fn test_filter_orderby(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -85,7 +85,7 @@ fn test_filter_orderby(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -118,7 +118,7 @@ fn test_filter_groupby_orderby(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -128,7 +128,7 @@ fn test_filter_groupby_orderby(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -138,7 +138,7 @@ fn test_filter_groupby_orderby(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -183,7 +183,7 @@ fn test_equations_filter_groupby_orderby(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -193,7 +193,7 @@ fn test_equations_filter_groupby_orderby(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -203,7 +203,7 @@ fn test_equations_filter_groupby_orderby(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -341,7 +341,7 @@ fn test_equations_filter_groupby_having_orderby(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -351,7 +351,7 @@ fn test_equations_filter_groupby_having_orderby(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -361,7 +361,7 @@ fn test_equations_filter_groupby_having_orderby(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -394,7 +394,7 @@ fn test_equations_filter_groupby_having_orderby(){
                                         equality: Equality::GT, 
                                         right: Operand::Number(13) 
                                     }, 
-                                subfilter: vec![] 
+                                sub_filters: vec![] 
                             }
                         ],
                     equations: vec![
@@ -425,7 +425,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -435,7 +435,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -445,7 +445,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -478,7 +478,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
                                         equality: Equality::GT, 
                                         right: Operand::Number(13) 
                                     }, 
-                                subfilter: vec![] 
+                                sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Page( Page{ page: 20, page_size:100 } )),
@@ -509,7 +509,7 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -519,7 +519,7 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -529,7 +529,7 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -562,7 +562,7 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                                         equality: Equality::GT, 
                                         right: Operand::Number(13) 
                                     }, 
-                                subfilter: vec![] 
+                                sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Limit( Limit{ limit: 100, offset: Some(25) } )),
@@ -623,7 +623,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -633,7 +633,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -643,7 +643,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -676,7 +676,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                                         equality: Equality::GT, 
                                         right: Operand::Number(13) 
                                     }, 
-                                subfilter: vec![] 
+                                sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Limit( Limit{ limit: 100, offset: Some(25) } )),

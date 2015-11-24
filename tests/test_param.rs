@@ -16,7 +16,7 @@ fn test_filters(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -26,7 +26,7 @@ fn test_filters(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -36,7 +36,7 @@ fn test_filters(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -68,7 +68,7 @@ fn test_filters_equations(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -78,7 +78,7 @@ fn test_filters_equations(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -88,7 +88,7 @@ fn test_filters_equations(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -121,7 +121,7 @@ fn test_filters_equations2(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -131,7 +131,7 @@ fn test_filters_equations2(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -141,7 +141,7 @@ fn test_filters_equations2(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -178,7 +178,7 @@ fn test_filters2_equations2(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -188,7 +188,7 @@ fn test_filters2_equations2(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -198,7 +198,7 @@ fn test_filters2_equations2(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![
+                                            sub_filters: vec![
                                                     Filter {
                                                         connector: Some(Connector::AND),
                                                         condition: Condition {
@@ -206,7 +206,7 @@ fn test_filters2_equations2(){
                                                             equality: Equality::LT,
                                                             right: Operand::Number(13)
                                                         },
-                                                        subfilter: vec![
+                                                        sub_filters: vec![
                                                             Filter {
                                                                 connector: Some(
                                                                     Connector::AND
@@ -216,7 +216,7 @@ fn test_filters2_equations2(){
                                                                     equality: Equality::EQ,
                                                                     right: Operand::Boolean(true)
                                                                 },
-                                                                subfilter: vec![
+                                                                sub_filters: vec![
                                                                     Filter {
                                                                         connector: Some(
                                                                             Connector::OR
@@ -226,7 +226,7 @@ fn test_filters2_equations2(){
                                                                             equality: Equality::EQ,
                                                                             right: Operand::Column("M".to_owned())
                                                                         },
-                                                                        subfilter: vec![]
+                                                                        sub_filters: vec![]
                                                                     }
                                                                 ]
                                                             },
@@ -405,7 +405,7 @@ Params {
                         13
                     )
                 },
-                subfilter: vec![
+                sub_filters: vec![
                     Filter {
                         connector: Some(
                             Connector::AND
@@ -419,7 +419,7 @@ Params {
                                 true
                             )
                         },
-                        subfilter: vec![
+                        sub_filters: vec![
                             Filter {
                                 connector: Some(
                                     Connector::OR
@@ -433,7 +433,7 @@ Params {
                                         "M".to_owned()
                                     )
                                 },
-                                subfilter: vec![]
+                                sub_filters: vec![]
                             }
                         ]
                     }

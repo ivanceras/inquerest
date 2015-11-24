@@ -11,7 +11,7 @@ fn test_simple(){
                                     equality:Equality::EQ,
                                     right: Operand::Boolean(true)
                             },
-                subfilter: vec![]
+                sub_filters: vec![]
                 }),
         filter("student=eq.true"))
 }
@@ -25,7 +25,7 @@ fn test_enclosed(){
                                     equality:Equality::EQ,
                                     right: Operand::Boolean(true)
                             },
-                subfilter: vec![]
+                sub_filters: vec![]
                 }),
         filter("(student=eq.true)"))
 }
@@ -39,7 +39,7 @@ fn and_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::AND), 
                                    condition: Condition { 
@@ -47,7 +47,7 @@ fn and_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![] 
+                                   sub_filters: vec![] 
                                }
                            ] 
            }
@@ -65,7 +65,7 @@ fn enclosed_and_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::AND), 
                                    condition: Condition { 
@@ -73,7 +73,7 @@ fn enclosed_and_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![] 
+                                   sub_filters: vec![] 
                                }
                            ] 
            }
@@ -91,7 +91,7 @@ fn enclosed_or_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -99,7 +99,7 @@ fn enclosed_or_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![] 
+                                   sub_filters: vec![] 
                                }
                            ] 
            }
@@ -118,7 +118,7 @@ fn enclosed_or_filter2(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -126,7 +126,7 @@ fn enclosed_or_filter2(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13)
                                            }, 
-                                   subfilter: vec![] 
+                                   sub_filters: vec![] 
                                }
                            ] 
            }
@@ -145,7 +145,7 @@ fn and_and_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::AND), 
                                    condition: Condition { 
@@ -153,7 +153,7 @@ fn and_and_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![ 
+                                   sub_filters: vec![ 
                                        Filter { 
                                        connector: Some(Connector::AND), 
                                        condition: Condition { 
@@ -161,7 +161,7 @@ fn and_and_filter(){
                                                equality: Equality::GTE, 
                                                right:  Operand::Number(3)
                                            }, 
-                                       subfilter: vec![] 
+                                       sub_filters: vec![] 
                                        }
                                    ] 
                                },
@@ -182,7 +182,7 @@ fn or_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -190,7 +190,7 @@ fn or_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![] 
+                                   sub_filters: vec![] 
                                }
                            ] 
            }
@@ -208,7 +208,7 @@ fn function_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -219,7 +219,7 @@ fn function_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![] 
+                                   sub_filters: vec![] 
                                }
                            ] 
            }
@@ -238,7 +238,7 @@ fn recursive_function_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -252,7 +252,7 @@ fn recursive_function_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![] 
+                                   sub_filters: vec![] 
                                }
                            ] 
            }
@@ -271,7 +271,7 @@ fn or_or_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -279,7 +279,7 @@ fn or_or_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![
+                                   sub_filters: vec![
                                        Filter { 
                                            connector: Some(Connector::OR), 
                                            condition: Condition { 
@@ -287,7 +287,7 @@ fn or_or_filter(){
                                                    equality: Equality::GTE, 
                                                    right:  Operand::Number(3)
                                                }, 
-                                           subfilter: vec![] 
+                                           sub_filters: vec![] 
                                        }
                                    ] 
                                },
@@ -310,7 +310,7 @@ fn and_or_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::AND), 
                                    condition: Condition { 
@@ -318,7 +318,7 @@ fn and_or_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![
+                                   sub_filters: vec![
                                        Filter { 
                                            connector: Some(Connector::OR), 
                                            condition: Condition { 
@@ -326,7 +326,7 @@ fn and_or_filter(){
                                                    equality: Equality::GTE, 
                                                    right:  Operand::Number(3)
                                                }, 
-                                           subfilter: vec![] 
+                                           sub_filters: vec![] 
                                        }
                                    ] 
                                },
@@ -348,7 +348,7 @@ fn or_and_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -356,7 +356,7 @@ fn or_and_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![
+                                   sub_filters: vec![
                                            Filter { 
                                                connector: Some(Connector::AND), 
                                                condition: Condition { 
@@ -364,7 +364,7 @@ fn or_and_filter(){
                                                        equality: Equality::GTE, 
                                                        right:  Operand::Number(3)
                                                    }, 
-                                               subfilter: vec![] 
+                                               sub_filters: vec![] 
                                            }
                                    ] 
                                },
@@ -386,7 +386,7 @@ fn enclosed_or_and_filter(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -394,7 +394,7 @@ fn enclosed_or_and_filter(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![
+                                   sub_filters: vec![
                                            Filter { 
                                                connector: Some(Connector::AND), 
                                                condition: Condition { 
@@ -402,7 +402,7 @@ fn enclosed_or_and_filter(){
                                                        equality: Equality::GTE, 
                                                        right:  Operand::Number(3)
                                                    }, 
-                                               subfilter: vec![] 
+                                               sub_filters: vec![] 
                                            }
                                    ] 
                                },
@@ -424,7 +424,7 @@ fn enclosed_or_and_filter2(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::AND), 
                                    condition: Condition { 
@@ -432,7 +432,7 @@ fn enclosed_or_and_filter2(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![
+                                   sub_filters: vec![
                                            Filter { 
                                                connector: Some(Connector::OR), 
                                                condition: Condition { 
@@ -440,7 +440,7 @@ fn enclosed_or_and_filter2(){
                                                        equality: Equality::GTE, 
                                                        right:  Operand::Number(3)
                                                    }, 
-                                               subfilter: vec![] 
+                                               sub_filters: vec![] 
                                            }
                                    ] 
                                },
@@ -461,7 +461,7 @@ fn or_and_filter_with_function(){
                        left: Operand::Column("student".to_owned()), 
                        equality: Equality::EQ, 
                        right: Operand::Boolean(true) }, 
-                       subfilter: vec![
+                       sub_filters: vec![
                                Filter { 
                                    connector: Some(Connector::OR), 
                                    condition: Condition { 
@@ -469,7 +469,7 @@ fn or_and_filter_with_function(){
                                                equality: Equality::LT, 
                                                right: Operand::Number(13) 
                                            }, 
-                                   subfilter: vec![
+                                   sub_filters: vec![
                                        Filter { 
                                                connector: Some(Connector::AND), 
                                                condition: Condition { 
@@ -480,7 +480,7 @@ fn or_and_filter_with_function(){
                                                        equality: Equality::GTE, 
                                                        right:  Operand::Number(3)
                                                    }, 
-                                               subfilter: vec![] 
+                                               sub_filters: vec![] 
                                            }
                                    ] 
                                },

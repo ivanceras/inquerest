@@ -76,7 +76,7 @@ pub struct Condition{
 pub struct Filter{
     pub connector: Option<Connector>,
     pub condition: Condition,
-    pub subfilter: Vec<Filter>,
+    pub sub_filters: Vec<Filter>, //[FIXME] rename to sub_filters
 }
 
 #[derive(Debug)]
@@ -337,12 +337,12 @@ filter -> Filter
     	let rf = Filter{
     		connector:Some(conn),
     		condition: f.condition,
-    		subfilter: f.subfilter
+    		sub_filters: f.sub_filters
     	};
 		Filter{
     		connector: None,
     		condition: c,
-    		subfilter: vec![rf]
+    		sub_filters: vec![rf]
     	}
     }
     / "(" f:filter ")" { 
@@ -352,7 +352,7 @@ filter -> Filter
     	Filter{
     		connector: None,
     		condition: c,
-    		subfilter: vec![]
+    		sub_filters: vec![]
     	}
     }
     
@@ -573,7 +573,7 @@ fn test_filter(){
                                     equality:Equality::EQ,
                                     right: Operand::Boolean(true)
                             },
-                subfilter: vec![]
+                sub_filters: vec![]
                 }),
         filter("student=eq.true"))
 }
@@ -595,7 +595,7 @@ fn test_params(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -605,7 +605,7 @@ fn test_params(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -615,7 +615,7 @@ fn test_params(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -645,7 +645,7 @@ fn test_query(){
                                 equality: Equality::LT,
                                 right: Operand::Number(13)
                             },
-                            subfilter: vec![
+                            sub_filters: vec![
                                 Filter {
                                     connector: Some(
                                         Connector::AND
@@ -655,7 +655,7 @@ fn test_query(){
                                         equality: Equality::EQ,
                                         right: Operand::Boolean(true)
                                     },
-                                    subfilter: vec![
+                                    sub_filters: vec![
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -665,7 +665,7 @@ fn test_query(){
                                                 equality: Equality::EQ,
                                                 right: Operand::Column("M".to_owned())
                                             },
-                                            subfilter: vec![]
+                                            sub_filters: vec![]
                                         }
                                     ]
                                 },
@@ -698,7 +698,7 @@ fn test_query(){
                                         equality: Equality::GT, 
                                         right: Operand::Number(13) 
                                     }, 
-                                subfilter: vec![] 
+                                sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Limit( Limit{ limit: 100, offset: Some(25) } )),
