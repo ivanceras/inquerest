@@ -157,7 +157,7 @@ use super::*;
 
 #[pub]
 name -> String
-  	= [a-zA-Z0-9_]+ { match_str.to_string() }
+  	= [a-zA-Z0-9_\-]+ { match_str.to_string() }
 
 #[pub]
 number -> i64
@@ -451,6 +451,7 @@ fn test_name(){
         name("age"));
 }
 
+
 #[test]
 fn test_column(){
     assert_eq!(
@@ -713,4 +714,51 @@ fn test_query(){
         , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
 }
 
+//#[test]
+fn test_params_with_string(){
+    assert_eq!(
+        	Ok(
+                Params {
+                    filters: vec![
+                        Filter {
+                            connector: None,
+                            condition: Condition {
+                                left: Operand::Column("age".to_owned()),
+                                equality: Equality::LT,
+                                right: Operand::Number(13)
+                            },
+                            sub_filters: vec![
+                                Filter {
+                                    connector: Some(
+                                        Connector::AND
+                                    ),
+                                    condition: Condition {
+                                        left: Operand::Column("student".to_owned()),
+                                        equality: Equality::EQ,
+                                        right: Operand::Boolean(true)
+                                    },
+                                    sub_filters: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::OR
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column("gender".to_owned()),
+                                                equality: Equality::EQ,
+                                                right: Operand::Column("M".to_owned())
+                                            },
+                                            sub_filters: vec![]
+                                        }
+                                    ]
+                                },
+                                
+                            ]
+                        }
+                    ],
+                    equations: vec![Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }]
+                }
+            )
+        
+        , params("age=eq.f7521093-734d-488a-9f60-fc9f11f7e750&student=eq.true|gender=eq.M&x=123"));
+}
 

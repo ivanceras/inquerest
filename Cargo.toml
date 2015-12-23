@@ -1,7 +1,7 @@
 [package]
 
 name = "inquerest"
-version = "0.0.5"
+version = "0.0.7"
 authors = [ "Jovansonlee Cesar<ivanceras@gmail.com>" ]
 license = "MIT"
 description = "A complex url parameter parser for rest filter queries"
@@ -11,4 +11,4 @@ documentation = "https://ivanceras.github.io/inquerest/inquerest"
 keywords = ["url", "param", "parser", "rest", "query", ]
 
 [dependencies]
-peg = "0.3.4"
+peg = "0.3.6"
