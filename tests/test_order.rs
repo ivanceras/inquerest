@@ -6,8 +6,9 @@ use inquerest::*;
 fn test_desc(){
     assert_eq!(
         Ok(Order{
-            column: "age".to_owned(), 
-            direction: Direction::DESC, 
+            operand: Operand::Column("age".to_owned()), 
+            direction: Some(Direction::DESC), 
+			nulls_where: None,
         }),
         order("age.desc"));
 }
@@ -17,8 +18,9 @@ fn test_desc(){
 fn test_asc(){
     assert_eq!(
         Ok(Order{
-            column: "age".to_owned(), 
-            direction: Direction::ASC, 
+            operand: Operand::Column("age".to_owned()), 
+            direction: Some(Direction::ASC), 
+			nulls_where: None,
         }),
         order("age.asc"));
 }
@@ -28,8 +30,9 @@ fn test_asc(){
 fn test_table_column_order(){
     assert_eq!(
         Ok(Order{
-            column: "person.age".to_owned(), 
-            direction: Direction::DESC, 
+            operand: Operand::Column("person.age".to_owned()), 
+            direction: Some(Direction::DESC), 
+			nulls_where: None,
         }),
         order("person.age.desc"));
 }
@@ -39,8 +42,9 @@ fn test_table_column_order(){
 fn test_order_by(){
     assert_eq!(
         Ok(vec![Order{
-            column: "age".to_owned(), 
-            direction: Direction::ASC, 
+            operand: Operand::Column("age".to_owned()), 
+            direction: Some(Direction::ASC), 
+			nulls_where: None,
         }]),
         order_by("order_by=age.asc"));
 }
@@ -49,12 +53,14 @@ fn test_order_by(){
 fn test_order_by2(){
     assert_eq!(
         Ok(vec![Order{
-                column: "age".to_owned(), 
-                direction: Direction::ASC, 
+                operand: Operand::Column("age".to_owned()), 
+                direction: Some(Direction::ASC), 
+				nulls_where: None,
             },
             Order{
-                column: "grade".to_owned(), 
-                direction: Direction::DESC, 
+                operand: Operand::Column("grade".to_owned()), 
+                direction: Some(Direction::DESC), 
+				nulls_where: None,
             }
             ]),
         order_by("order_by=age.asc,grade.desc"));
@@ -65,16 +71,19 @@ fn test_order_by2(){
 fn test_order_by3(){
     assert_eq!(
         Ok(vec![Order{
-                column: "age".to_owned(), 
-                direction: Direction::DESC, 
+                operand: Operand::Column("age".to_owned()), 
+                direction: Some(Direction::DESC), 
+				nulls_where: None,
             },
             Order{
-                column: "grade".to_owned(), 
-                direction: Direction::DESC, 
+                operand: Operand::Column("grade".to_owned()), 
+                direction: Some(Direction::DESC), 
+				nulls_where: None,
             },
             Order{
-                column: "height".to_owned(), 
-                direction: Direction::ASC, 
+                operand: Operand::Column("height".to_owned()), 
+                direction: Some(Direction::ASC), 
+				nulls_where: None,
             }
             ]),
         order_by("order_by=age.desc,grade.desc,height.asc"));
@@ -85,16 +94,19 @@ fn test_order_by3(){
 fn test_order_by4(){
     assert_eq!(
         Ok(vec![Order{
-                column: "person.age".to_owned(), 
-                direction: Direction::DESC, 
+                operand: Operand::Column("person.age".to_owned()), 
+                direction: Some(Direction::DESC), 
+				nulls_where: None,
             },
             Order{
-                column: "student.grade".to_owned(), 
-                direction: Direction::DESC, 
+                operand: Operand::Column("student.grade".to_owned()), 
+                direction: Some(Direction::DESC), 
+				nulls_where: None,
             },
             Order{
-                column: "height".to_owned(), 
-                direction: Direction::ASC, 
+                operand: Operand::Column("height".to_owned()), 
+                direction: Some(Direction::ASC), 
+				nulls_where: None,
             }
             ]),
         order_by("order_by=person.age.desc,student.grade.desc,height.asc"));

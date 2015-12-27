@@ -41,9 +41,17 @@ pub enum Direction{
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+pub enum NullsWhere{
+	FIRST,
+	LAST,
+}
+
+#[derive(Debug)]
+#[derive(PartialEq)]
 pub struct Order{
-    pub column: String,
-    pub direction: Direction,
+    pub operand: Operand,
+    pub direction: Option<Direction>,
+	pub nulls_where: Option<NullsWhere>
 }
 
 #[derive(Debug)]
@@ -226,9 +234,14 @@ direction -> Direction
 	= "asc" { Direction::ASC }
 	/ "desc" { Direction::DESC }
 
+#[pub] 
+nulls_where -> NullsWhere
+	= "nullsfirst" { NullsWhere::FIRST }
+	/ "nullslast" { NullsWhere::LAST }
+
 #[pub]
 order -> Order
-	= c:column_name "." d:direction { Order{ column: c, direction: d} }
+	= o:operand d:("." direction)? n:("." nulls_where)?  { Order{ operand: o, direction: d, nulls_where: n} }
 
 #[pub]
 order_by -> Vec<Order>
@@ -298,12 +311,6 @@ page -> i64
 page_size -> i64
 	= "page_size" "=" ps:number { ps }		
 
-and_page_size -> i64
-	= "&" ps: page_size { ps }
-
-and_page -> i64
-	= "&"? p: page { p }
-
 #[pub]
 limit -> i64
 	= "limit" "=" l:number { l }
@@ -311,17 +318,12 @@ limit -> i64
 offset -> i64
 	= "offset" "=" o:number { o }
 
-and_limit -> i64
-	= "&"?  l:limit { l }
-and_offset -> i64
-	= "&" o:offset { o }
-
 #[pub]
 range -> Range
-	= p:and_page ps:and_page_size {
+	= p:("&" page) ps:("&" page_size) {
 		Range::Page(Page{ page: p, page_size: ps})
 	}
-	/ l:and_limit o:and_offset? {
+	/ l:("&" limit) o:("&" offset)? {
 		Range::Limit(Limit{ limit: l, offset: o})
 	}
 
@@ -357,15 +359,6 @@ filter -> Filter
     }
     
 
-and_order_by -> Vec<Order>
-	=  "&"? o:order_by { o }
-
-and_group_by -> Vec<Operand>
-	=  "&"? g:group_by { g }
-	
-and_having -> Vec<Filter>
-	=  "&"? h:having { h }
-	
 and_equations -> Vec<Equation>
 	=  "&"? e:equation ** "&" { e }
 
@@ -389,7 +382,7 @@ params -> Params
 
 #[pub]
 query -> Query
- = fr:from? j:and_join? f:and_filters? g:and_group_by? h:and_having? o:and_order_by? r:range? e:and_equations? {
+ = fr:from? j:and_join? f:and_filters? g:("&"? group_by)? h:("&"? having)? o:("&"? order_by)? r:range? e:and_equations? {
  	Query{  
  			from: match fr{
  					Some(fr) => fr,
@@ -534,8 +527,9 @@ fn test_function(){
 fn test_order(){
     assert_eq!(
         Ok(Order{
-            column: "age".to_owned(), 
-            direction: Direction::DESC, 
+            operand: Operand::Column("age".to_owned()), 
+            direction: Some(Direction::DESC), 
+			nulls_where: None,
         }),
         order("age.desc"));
 }
@@ -675,8 +669,8 @@ fn test_query(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None }, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     group_by: vec![
                         Operand::Function(

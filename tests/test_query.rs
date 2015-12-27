@@ -94,8 +94,8 @@ fn test_filter_orderby(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None}, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     ..Default::default()
                 }
@@ -147,8 +147,8 @@ fn test_filter_groupby_orderby(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None }, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     group_by: vec![
                             Operand::Function(
@@ -212,8 +212,8 @@ fn test_equations_filter_groupby_orderby(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None }, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     group_by: vec![
                         Operand::Function(
@@ -243,7 +243,7 @@ fn test_orderby(){
     assert_eq!(
         	Ok(
                 Query {
-                    order_by: vec![Order { column: "height".to_owned(), direction: Direction::ASC }],
+                    order_by: vec![Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }],
                     ..Default::default()
                 }
             )
@@ -251,13 +251,25 @@ fn test_orderby(){
         , query("order_by=height.asc"));
 }
 #[test]
+fn test_orderby_nullsfirst(){
+    assert_eq!(
+        	Ok(
+                Query {
+                    order_by: vec![Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: Some(NullsWhere::FIRST) }],
+                    ..Default::default()
+                }
+            )
+        
+        , query("order_by=height.asc.nullsfirst"));
+}
+#[test]
 fn test_orderby2(){
     assert_eq!(
         	Ok(
                 Query {
                     order_by: vec![
-                        Order { column: "height".to_owned(), direction: Direction::ASC },
-                        Order { column: "grade".to_owned(), direction: Direction::DESC }
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None },
+                        Order { operand: Operand::Column("grade".to_owned()), direction: Some(Direction::DESC), nulls_where: None }
                         ],
                     ..Default::default()
                 }
@@ -307,8 +319,8 @@ fn test_groupby_orderby(){
         	Ok(
                 Query {
                     order_by: vec![
-                        Order { column: "height".to_owned(), direction: Direction::ASC },
-                        Order { column: "grade".to_owned(), direction: Direction::DESC }
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None },
+                        Order { operand: Operand::Column("grade".to_owned()), direction: Some(Direction::DESC), nulls_where: None }
                         ],
                     group_by: vec![
                        Operand::Function(Function { 
@@ -370,8 +382,8 @@ fn test_equations_filter_groupby_having_orderby(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None }, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     group_by: vec![
                         Operand::Function(
@@ -454,8 +466,8 @@ fn test_equations_filter_groupby_having_orderby_page(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None }, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     group_by: vec![
                         Operand::Function(
@@ -538,8 +550,8 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None }, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     group_by: vec![
                         Operand::Function(
@@ -652,8 +664,8 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                         }
                     ],
                     order_by: vec![
-                        Order { column: "age".to_owned(), direction: Direction::DESC }, 
-                        Order { column: "height".to_owned(), direction: Direction::ASC }
+                        Order { operand: Operand::Column("age".to_owned()), direction: Some(Direction::DESC), nulls_where: None }, 
+                        Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }
                         ],
                     group_by: vec![
                         Operand::Function(
