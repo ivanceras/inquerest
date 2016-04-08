@@ -14,7 +14,7 @@ fn test_filters(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -63,7 +63,7 @@ fn test_filter_orderby(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -116,7 +116,7 @@ fn test_filter_groupby_orderby(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -181,7 +181,7 @@ fn test_equations_filter_groupby_orderby(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -226,8 +226,8 @@ fn test_equations_filter_groupby_orderby(){
                        Operand::Column("gender".to_owned()) 
                     ],
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
-                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456f64) }
                     ],
                     ..Default::default()
                 }
@@ -351,7 +351,7 @@ fn test_equations_filter_groupby_having_orderby(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -404,14 +404,14 @@ fn test_equations_filter_groupby_having_orderby(){
                                                     params: vec![Operand::Column("age".to_owned())] 
                                                 }), 
                                         equality: Equality::GT, 
-                                        right: Operand::Number(13) 
+                                        right: Operand::Number(13f64) 
                                     }, 
                                 sub_filters: vec![] 
                             }
                         ],
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
-                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456f64) }
                     ],
                     ..Default::default()
                 }
@@ -435,7 +435,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -488,15 +488,15 @@ fn test_equations_filter_groupby_having_orderby_page(){
                                                     params: vec![Operand::Column("age".to_owned())] 
                                                 }), 
                                         equality: Equality::GT, 
-                                        right: Operand::Number(13) 
+                                        right: Operand::Number(13f64) 
                                     }, 
                                 sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Page( Page{ page: 20, page_size:100 } )),
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
-                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456f64) }
                     ],
                     ..Default::default()
                 }
@@ -519,7 +519,7 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -572,15 +572,15 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                                                     params: vec![Operand::Column("age".to_owned())] 
                                                 }), 
                                         equality: Equality::GT, 
-                                        right: Operand::Number(13) 
+                                        right: Operand::Number(13f64) 
                                     }, 
                                 sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Limit( Limit{ limit: 100, offset: Some(25) } )),
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
-                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456f64) }
                     ],
                     ..Default::default()
                 }
@@ -633,7 +633,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -686,15 +686,15 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                                                     params: vec![Operand::Column("age".to_owned())] 
                                                 }), 
                                         equality: Equality::GT, 
-                                        right: Operand::Number(13) 
+                                        right: Operand::Number(13f64) 
                                     }, 
                                 sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Limit( Limit{ limit: 100, offset: Some(25) } )),
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
-                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456f64) }
                     ],
                     ..Default::default()
                 }

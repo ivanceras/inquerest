@@ -9,7 +9,7 @@ fn test_eq(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::EQ, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=eq.13"));
 }
@@ -20,7 +20,7 @@ fn test_neq(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::NEQ, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=neq.13"));
 }
@@ -30,7 +30,7 @@ fn test_lt(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::LT, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=lt.13"));
 }
@@ -40,7 +40,7 @@ fn test_lte(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::LTE, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=lte.13"));
 }
@@ -52,7 +52,7 @@ fn test_ltee(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::LTE, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=ltee.13"));
 }
@@ -63,7 +63,7 @@ fn test_gt(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::GT, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=gt.13"));
 }
@@ -73,7 +73,7 @@ fn test_gte(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::GTE, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=gte.13"));
 }
@@ -85,7 +85,7 @@ fn test_lgee(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::GTE, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=gtee.13"));
 }
@@ -102,7 +102,7 @@ fn test_function(){
                         }
                     ),
                 equality: Equality::GTE,
-                right:Operand::Number(3)
+                right:Operand::Number(3f64)
             }),
         condition("min(grade)=gte.3"));
 }

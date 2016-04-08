@@ -22,7 +22,7 @@ pub struct Function{
 pub enum Operand{
     Column(String),
     Function(Function),
-    Number(i64),
+    Number(f64),
     Boolean(bool)
 }
 
@@ -168,8 +168,18 @@ name -> String
   	= [a-zA-Z0-9_\-]+ { match_str.to_string() }
 
 #[pub]
-number -> i64
-	= [0-9]+ { match_str.parse().unwrap() }
+number -> f64
+    = "-"? int frac? exp? {match_str.parse().unwrap()}
+
+int -> i64
+    = "0"  {match_str.parse().unwrap()}
+	/ [1-9][0-9]* {match_str.parse().unwrap()}
+
+exp -> String 
+    = ("e" / "E") ("-" / "+")? [0-9]{1,} { match_str.to_owned() }
+
+frac -> f64
+    = "." [0-9]{1,} { match_str.parse().unwrap() }
 
 #[pub]
 boolean -> bool
@@ -305,18 +315,18 @@ having -> Vec<Filter>
 
 #[pub]
 page -> i64
-	= "page" "=" p:number { p }
+	= "page" "=" p:int { p }
 
 #[pub]
 page_size -> i64
-	= "page_size" "=" ps:number { ps }		
+	= "page_size" "=" ps:int { ps }		
 
 #[pub]
 limit -> i64
-	= "limit" "=" l:number { l }
+	= "limit" "=" l:int { l }
 #[pub]
 offset -> i64
-	= "offset" "=" o:number { o }
+	= "offset" "=" o:int { o }
 
 #[pub]
 range -> Range
@@ -433,7 +443,7 @@ fn test_boolean_false(){
 #[test]
 fn test_number(){
     assert_eq!(
-        Ok(123),
+        Ok(123f64),
         number("123"));
 }
 
@@ -541,7 +551,7 @@ fn test_euqation(){
     assert_eq!(
         Ok(Equation { 
                 left: Operand::Column("x".to_owned()), 
-                right: Operand::Number(123) 
+                right: Operand::Number(123f64) 
             }),
         equation("x=123"));
 }
@@ -554,7 +564,7 @@ fn test_condition(){
         Ok(Condition{
             left:Operand::Column("age".to_owned()), 
             equality:Equality::EQ, 
-            right:Operand::Number(13)
+            right:Operand::Number(13f64)
         }),
         condition("age=eq.13"));
 }
@@ -588,7 +598,7 @@ fn test_params(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -618,7 +628,7 @@ fn test_params(){
                             ]
                         }
                     ],
-                    equations: vec![Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }]
+                    equations: vec![Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }]
                 }
             )
         
@@ -638,7 +648,7 @@ fn test_query(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -691,15 +701,15 @@ fn test_query(){
                                                     params: vec![Operand::Column("age".to_owned())] 
                                                 }), 
                                         equality: Equality::GT, 
-                                        right: Operand::Number(13) 
+                                        right: Operand::Number(13f64) 
                                     }, 
                                 sub_filters: vec![] 
                             }
                         ],
                     range: Some(Range::Limit( Limit{ limit: 100, offset: Some(25) } )),
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }, 
-                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456) }
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }, 
+                        Equation { left: Operand::Column("y".to_owned()), right: Operand::Number(456f64) }
                     ],
                     ..Default::default()
                 }
@@ -719,7 +729,7 @@ fn test_params_with_string(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -749,7 +759,7 @@ fn test_params_with_string(){
                             ]
                         }
                     ],
-                    equations: vec![Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }]
+                    equations: vec![Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }]
                 }
             )
         

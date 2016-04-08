@@ -13,7 +13,7 @@ fn test_column(){
 #[test]
 fn test_number(){
     assert_eq!(
-        Ok(123),
+        Ok(123f64),
         number("123"));
 }
 

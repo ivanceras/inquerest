@@ -14,7 +14,7 @@ fn test_filters(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -66,7 +66,7 @@ fn test_filters_equations(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -96,7 +96,7 @@ fn test_filters_equations(){
                             ]
                         }
                     ],
-                    equations: vec![Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) }]
+                    equations: vec![Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) }]
                 }
             )
         
@@ -119,7 +119,7 @@ fn test_filters_equations2(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -150,7 +150,7 @@ fn test_filters_equations2(){
                         }
                     ],
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) },
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) },
                         Equation { left: Operand::Column("title".to_owned()), right: Operand::Column("engr".to_owned()) }
                         ]
                 }
@@ -176,7 +176,7 @@ fn test_filters2_equations2(){
                             condition: Condition {
                                 left: Operand::Column("age".to_owned()),
                                 equality: Equality::LT,
-                                right: Operand::Number(13)
+                                right: Operand::Number(13f64)
                             },
                             sub_filters: vec![
                                 Filter {
@@ -204,7 +204,7 @@ fn test_filters2_equations2(){
                                                         condition: Condition {
                                                             left: Operand::Column("age".to_owned()),
                                                             equality: Equality::LT,
-                                                            right: Operand::Number(13)
+                                                            right: Operand::Number(13f64)
                                                         },
                                                         sub_filters: vec![
                                                             Filter {
@@ -242,7 +242,7 @@ fn test_filters2_equations2(){
                         },
                     ],
                     equations: vec![
-                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123) },
+                        Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(123f64) },
                         Equation { left: Operand::Column("title".to_owned()), right: Operand::Column("engr".to_owned()) }
                         ]
                 }
@@ -343,7 +343,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit_as_param(){
                     "limit".to_owned()
                 ),
                 right: Operand::Number(
-                    100
+                    100f64
                 )
             },
             Equation {
@@ -351,7 +351,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit_as_param(){
                     "offset".to_owned()
                 ),
                 right: Operand::Number(
-                    25
+                    25f64
                 )
             },
             Equation {
@@ -359,7 +359,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit_as_param(){
                     "x".to_owned()
                 ),
                 right: Operand::Number(
-                    123
+                    123f64
                 )
             },
             Equation {
@@ -367,7 +367,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit_as_param(){
                     "y".to_owned()
                 ),
                 right: Operand::Number(
-                    456
+                    456f64
                 )
             }
         ]
@@ -402,7 +402,7 @@ Params {
                     ),
                     equality: Equality::LT,
                     right: Operand::Number(
-                        13
+                        13f64
                     )
                 },
                 sub_filters: vec![
@@ -469,7 +469,7 @@ Params {
                     "limit".to_owned()
                 ),
                 right: Operand::Number(
-                    100
+                    100f64
                 )
             },
             Equation {
@@ -477,7 +477,7 @@ Params {
                     "offset".to_owned()
                 ),
                 right: Operand::Number(
-                    25
+                    25f64
                 )
             },
             Equation {
@@ -485,7 +485,7 @@ Params {
                     "x".to_owned()
                 ),
                 right: Operand::Number(
-                    123
+                    123f64
                 )
             },
             Equation {
@@ -493,7 +493,7 @@ Params {
                     "y".to_owned()
                 ),
                 right: Operand::Number(
-                    456
+                    456f64
                 )
             },
             Equation {

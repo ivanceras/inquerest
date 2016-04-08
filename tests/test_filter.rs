@@ -45,7 +45,7 @@ fn and_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![] 
                                }
@@ -71,7 +71,7 @@ fn enclosed_and_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![] 
                                }
@@ -97,7 +97,7 @@ fn enclosed_or_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![] 
                                }
@@ -124,7 +124,7 @@ fn enclosed_or_filter2(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13)
+                                               right: Operand::Number(13f64)
                                            }, 
                                    sub_filters: vec![] 
                                }
@@ -151,7 +151,7 @@ fn and_and_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![ 
                                        Filter { 
@@ -159,7 +159,7 @@ fn and_and_filter(){
                                        condition: Condition { 
                                                left:  Operand::Column("grade".to_owned()), 
                                                equality: Equality::GTE, 
-                                               right:  Operand::Number(3)
+                                               right:  Operand::Number(3f64)
                                            }, 
                                        sub_filters: vec![] 
                                        }
@@ -188,7 +188,7 @@ fn or_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![] 
                                }
@@ -217,7 +217,7 @@ fn function_filter(){
                                                                params: vec![Operand::Column("age".to_owned())]
                                                            }),
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![] 
                                }
@@ -250,7 +250,7 @@ fn recursive_function_filter(){
                                                                                     })]
                                                            }),
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![] 
                                }
@@ -277,7 +277,7 @@ fn or_or_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![
                                        Filter { 
@@ -285,7 +285,7 @@ fn or_or_filter(){
                                            condition: Condition { 
                                                    left:  Operand::Column("grade".to_owned()), 
                                                    equality: Equality::GTE, 
-                                                   right:  Operand::Number(3)
+                                                   right:  Operand::Number(3f64)
                                                }, 
                                            sub_filters: vec![] 
                                        }
@@ -316,7 +316,7 @@ fn and_or_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![
                                        Filter { 
@@ -324,7 +324,7 @@ fn and_or_filter(){
                                            condition: Condition { 
                                                    left:  Operand::Column("grade".to_owned()), 
                                                    equality: Equality::GTE, 
-                                                   right:  Operand::Number(3)
+                                                   right:  Operand::Number(3f64)
                                                }, 
                                            sub_filters: vec![] 
                                        }
@@ -354,7 +354,7 @@ fn or_and_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![
                                            Filter { 
@@ -362,7 +362,7 @@ fn or_and_filter(){
                                                condition: Condition { 
                                                        left:  Operand::Column("grade".to_owned()), 
                                                        equality: Equality::GTE, 
-                                                       right:  Operand::Number(3)
+                                                       right:  Operand::Number(3f64)
                                                    }, 
                                                sub_filters: vec![] 
                                            }
@@ -392,7 +392,7 @@ fn enclosed_or_and_filter(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![
                                            Filter { 
@@ -400,7 +400,7 @@ fn enclosed_or_and_filter(){
                                                condition: Condition { 
                                                        left:  Operand::Column("grade".to_owned()), 
                                                        equality: Equality::GTE, 
-                                                       right:  Operand::Number(3)
+                                                       right:  Operand::Number(3f64)
                                                    }, 
                                                sub_filters: vec![] 
                                            }
@@ -430,7 +430,7 @@ fn enclosed_or_and_filter2(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![
                                            Filter { 
@@ -438,7 +438,7 @@ fn enclosed_or_and_filter2(){
                                                condition: Condition { 
                                                        left:  Operand::Column("grade".to_owned()), 
                                                        equality: Equality::GTE, 
-                                                       right:  Operand::Number(3)
+                                                       right:  Operand::Number(3f64)
                                                    }, 
                                                sub_filters: vec![] 
                                            }
@@ -467,7 +467,7 @@ fn or_and_filter_with_function(){
                                    condition: Condition { 
                                                left: Operand::Column("age".to_owned()), 
                                                equality: Equality::LT, 
-                                               right: Operand::Number(13) 
+                                               right: Operand::Number(13f64) 
                                            }, 
                                    sub_filters: vec![
                                        Filter { 
@@ -478,7 +478,7 @@ fn or_and_filter_with_function(){
                                                                    params: vec![Operand::Column("grade".to_owned())]
                                                                }), 
                                                        equality: Equality::GTE, 
-                                                       right:  Operand::Number(3)
+                                                       right:  Operand::Number(3f64)
                                                    }, 
                                                sub_filters: vec![] 
                                            }
