@@ -1,6 +1,6 @@
 language: rust
 rust:
-- nightly-2015-12-26
+- nightly
 
 script:
 - cargo build
