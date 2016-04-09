@@ -4,6 +4,41 @@ use inquerest::*;
 
 
 #[test]
+fn test_limit_only(){
+	assert_eq!(
+		Ok(
+		Query{
+			range: Some(
+				Range::Limit(
+					Limit {
+						limit: 5,
+						offset: None
+					}
+				)
+			),
+			..Default::default()
+		}),
+	inquerest::query("limit=5"))
+}
+#[test]
+fn test_limit_and_offset(){
+	assert_eq!(
+		Ok(
+		Query{
+			range: Some(
+				Range::Limit(
+					Limit {
+						limit: 5,
+						offset: Some(10)
+					}
+				)
+			),
+			..Default::default()
+		}),
+	inquerest::query("limit=5&offset=10"))
+}
+
+#[test]
 fn test_filters(){
     assert_eq!(
         	Ok(

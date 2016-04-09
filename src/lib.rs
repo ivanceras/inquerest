@@ -330,10 +330,10 @@ offset -> i64
 
 #[pub]
 range -> Range
-	= p:("&" page) ps:("&" page_size) {
+	= p:(page) ps:("&" page_size) {
 		Range::Page(Page{ page: p, page_size: ps})
 	}
-	/ l:("&" limit) o:("&" offset)? {
+	/ l:(limit) o:("&" offset)? {
 		Range::Limit(Limit{ limit: l, offset: o})
 	}
 
@@ -392,7 +392,7 @@ params -> Params
 
 #[pub]
 query -> Query
- = fr:from? j:and_join? f:and_filters? g:("&"? group_by)? h:("&"? having)? o:("&"? order_by)? r:range? e:and_equations? {
+ = fr:from? j:and_join? f:and_filters? g:("&"? group_by)? h:("&"? having)? o:("&"? order_by)? r:("&"?range)? e:and_equations? {
  	Query{  
  			from: match fr{
  					Some(fr) => fr,
