@@ -23,7 +23,8 @@ pub enum Operand{
     Column(String),
     Function(Function),
     Number(f64),
-    Boolean(bool)
+    Boolean(bool),
+    Value(String)
 }
 
 #[derive(Debug)]
@@ -84,7 +85,7 @@ pub struct Condition{
 pub struct Filter{
     pub connector: Option<Connector>,
     pub condition: Condition,
-    pub sub_filters: Vec<Filter>, //[FIXME] rename to sub_filters
+    pub sub_filters: Vec<Filter>, 
 }
 
 #[derive(Debug)]
@@ -172,8 +173,7 @@ number -> f64
     = "-"? int frac? exp? {match_str.parse().unwrap()}
 
 int -> i64
-    = "0"  {match_str.parse().unwrap()}
-	/ [1-9][0-9]* {match_str.parse().unwrap()}
+	= [0-9]{1,} {match_str.parse().unwrap()}
 
 exp -> String 
     = ("e" / "E") ("-" / "+")? [0-9]{1,} { match_str.to_owned() }
@@ -197,10 +197,11 @@ equation -> Equation
 
 #[pub]
 operand -> Operand
-	= f:function { Operand::Function(f) }
-	/ b:boolean { Operand::Boolean(b) }
-	/ n:number { Operand::Number(n) }
+	= b:boolean { Operand::Boolean(b) }
+	/ n:number { Operand::Number(n as f64) }
+	/ f:function { Operand::Function(f) }
 	/ c:column_name { Operand::Column(c) }
+    / "\[" v:name "\]" {Operand::Value(v) }
 
 #[pub]
 function -> Function

@@ -91,7 +91,7 @@ fn test_lgee(){
 }
 
 
-#[test]
+//#[test]
 fn test_function(){
     assert_eq!(
         Ok(Condition{

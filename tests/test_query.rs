@@ -738,3 +738,47 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
         , query("from=bazaar.person,student&left_join=person_student&on=student.id=person.student_id&age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
 }
 
+
+#[test]
+fn test_one_equation_only(){
+    let arg = "focused_record=f5f031e2-0d3d-11e6-ae81-1c6f65c301cc";
+    let result = query(arg);
+    assert!(result.is_ok())
+}
+
+#[test]
+fn test_valid_name(){
+   let arg = "85ea7227-e31e-41af-955e-0513177ddb9a";
+    let result = name(arg);
+    assert!(result.is_ok())
+}
+#[test]
+fn test_valid_column_name(){
+   let arg = "85ea7227-e31e-41af-955e-0513177ddb9a";
+    let result = column_name(arg);
+    assert!(result.is_ok())
+}
+
+#[test]
+fn test_valid_operand(){
+   let arg = "[85ea7227-e31e-41af-955e-0513177ddb9a]";
+    let result = operand(arg);
+    println!("result: {:?}", result);
+    assert!(result.is_ok())
+}
+
+#[test]
+fn test_valid_operand_qouted(){
+   let arg = "focused_record=[85ea7227-e31e-41af-955e-0513177ddb9a]";
+    let result = query(arg);
+    println!("result: {:?}", result);
+    assert!(result.is_ok())
+}
+
+#[test]
+fn test_focused(){
+    let arg = "focused=0";
+    let result = query(arg);
+    assert!(result.is_ok())
+}
+
