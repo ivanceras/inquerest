@@ -27,6 +27,20 @@ pub enum Operand {
     Value(String),
 }
 
+impl Operand{
+    fn value_append(self, s:&str)->Self{
+        match self{
+            Operand::Value(value) => {
+                Operand::Value(format!("{}{}",value,s))
+            }
+            Operand::Column(value) => {
+                Operand::Value(format!("{}{}",value,s))
+            }
+            _ => self
+        }
+    }
+}
+
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum Connector {
@@ -58,18 +72,19 @@ pub struct Order {
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum Equality {
-    EQ, // = ,
-    NEQ, // != ,
-    LT, // <,
-    LTE, // <=,
-    GT, // >,
-    GTE, // >=,
-    IN, // IN
-    NOT_IN, // NOT IN,
-    IS, // IS
-    IS_NOT, // IS NOT
-    LIKE, // LIKE
+    EQ, // = ,  eq
+    NEQ, // != , neq
+    LT, // <,  lt
+    LTE, // <=, lte
+    GT, // >, gt
+    GTE, // >=, gte
+    IN, // IN, in
+    NOT_IN, // NOT IN, not_in
+    IS, // IS, is
+    IS_NOT, // IS NOT, is_not
+    LIKE, // LIKE, like
     ILIKE, // ILIKE case insensitive like, postgresql specific
+    ST // Starts with, which will become ILIKE 'value%'
 }
 
 #[derive(Debug)]
@@ -233,11 +248,16 @@ equality -> Equality
 	}
     / "like"   { Equality::LIKE }
     / "ilike"   { Equality::ILIKE }
+    / "st"  {Equality::ST}
 
 #[pub]
 condition -> Condition
 	= l:operand "=" eq:equality "." r:operand {
-		Condition{left: l, equality: eq, right: r}
+        if eq == Equality::ST{
+		    Condition{left: l, equality: Equality::ILIKE, right: r.value_append("%")}
+        }else{
+		    Condition{left: l, equality: eq, right: r}
+        }
 	}
 
 #[pub]
@@ -549,6 +569,16 @@ fn test_condition() {
                    right: Operand::Number(13f64),
                }),
                condition("age=eq.13"));
+}
+
+#[test]
+fn test_starts_with() {
+    assert_eq!(Ok(Condition {
+                   left: Operand::Column("name".to_owned()),
+                   equality: Equality::ILIKE,
+                   right: Operand::Value("le%".to_string()),
+               }),
+               condition("name=st.le"));
 }
 
 #[test]
