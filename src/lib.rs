@@ -181,7 +181,7 @@ use super::*;
 
 #[pub]
 name -> String
-  	= [a-zA-Z0-9_\-]+ { match_str.to_string() }
+  	= [a-zA-Z0-9_\- ]+ { match_str.to_string() }
 
 #[pub]
 number -> f64
@@ -579,6 +579,18 @@ fn test_starts_with() {
                    right: Operand::Value("le%".to_string()),
                }),
                condition("name=st.le"));
+}
+
+#[test]
+fn test_percent20() {
+    let url = "name=st.lee cesar";
+    println!("url: {}", url);
+    assert_eq!(Ok(Condition {
+                   left: Operand::Column("name".to_owned()),
+                   equality: Equality::ILIKE,
+                   right: Operand::Value("lee cesar%".to_string()),
+               }),
+               condition(url));
 }
 
 #[test]
