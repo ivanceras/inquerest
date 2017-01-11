@@ -1,42 +1,44 @@
 extern crate inquerest;
+extern crate nom;
 
 use inquerest::*;
+use nom::IResult;
 
 #[test]
 fn test_min(){
     assert_eq!(
-        Ok(Function{
+        IResult::Done("".as_bytes(), Function{
             function: "min".to_owned(),
             params: vec![Operand::Column("age".to_owned())], 
         }),
-        function("min(age)"));
+        function("min(age)".as_bytes()));
 }
 
 #[test]
 fn test_max(){
     assert_eq!(
-        Ok(Function{
+        IResult::Done("".as_bytes(), Function{
             function: "max".to_owned(),
             params: vec![Operand::Column("age".to_owned())], 
         }),
-        function("max(age)"));
+        function("max(age)".as_bytes()));
 }
 
 #[test]
 fn test_sum(){
     assert_eq!(
-        Ok(Function{
+        IResult::Done("".as_bytes(), Function{
             function: "sum".to_owned(),
             params: vec![Operand::Column("age".to_owned())], 
         }),
-        function("sum(age)"));
+        function("sum(age)".as_bytes()));
 }
 
 
 #[test]
 fn test_max_sum(){
     assert_eq!(
-        Ok(
+        IResult::Done("".as_bytes(), 
             Function{
                 function:"max".to_owned(),
                 params: vec![Operand::Function(Function{
@@ -45,5 +47,5 @@ fn test_max_sum(){
                             })]
             }
         ),
-        function("max(sum(age))"));
+        function("max(sum(age))".as_bytes()));
 }

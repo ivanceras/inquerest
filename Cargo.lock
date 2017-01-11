@@ -2,32 +2,13 @@
 name = "inquerest"
 version = "0.1.5"
 dependencies = [
- "peg 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "peg-syntax-ext 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nom 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
-name = "peg"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "quote 0.3.10 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "peg-syntax-ext"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "peg 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "quote"
-version = "0.3.10"
+name = "nom"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
-"checksum peg 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b2f7b0a8240dbf3d5cca65bba9791de310ce783d6e1426e56dc1278356b8017a"
-"checksum peg-syntax-ext 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "40f9e24d396d5d1857dbacd9b8a12c9e9922f40a52ab56bfdb681194fbdd6bdc"
-"checksum quote 0.3.10 (registry+https://github.com/rust-lang/crates.io-index)" = "6732e32663c9c271bfc7c1823486b471f18c47a2dbf87c066897b7b51afc83be"
+"checksum nom 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ffc564b2727f758993db55d4ffed0d84bbd7f387a66509516768c8f786bb0b10"

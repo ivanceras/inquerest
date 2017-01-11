@@ -1,11 +1,13 @@
 extern crate inquerest;
+extern crate nom;
 
 use inquerest::*;
+use nom::IResult;
 
 #[test]
 fn test_simple(){
     assert_eq!(
-        Ok(Filter{
+        IResult::Done("".as_bytes(), Filter{
                 connector: None,
                 condition: Condition{left:Operand::Column("student".to_owned()),
                                     equality:Equality::EQ,
@@ -13,13 +15,13 @@ fn test_simple(){
                             },
                 sub_filters: vec![]
                 }),
-        filter("student=eq.true"))
+        filter("student=eq.true".as_bytes()))
 }
 
 #[test]
 fn test_enclosed(){
     assert_eq!(
-        Ok(Filter{
+        IResult::Done("".as_bytes(), Filter{
                 connector: None,
                 condition: Condition{left:Operand::Column("student".to_owned()),
                                     equality:Equality::EQ,
@@ -27,12 +29,12 @@ fn test_enclosed(){
                             },
                 sub_filters: vec![]
                 }),
-        filter("(student=eq.true)"))
+        filter("(student=eq.true)".as_bytes()))
 }
 #[test]
 fn and_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -52,13 +54,13 @@ fn and_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true&age=lt.13"))
+        filter("student=eq.true&age=lt.13".as_bytes()))
 }
 
 #[test]
 fn enclosed_and_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -78,13 +80,13 @@ fn enclosed_and_filter(){
                            ] 
            }
        ),
-        filter("(student=eq.true&age=lt.13)"))
+        filter("(student=eq.true&age=lt.13)".as_bytes()))
 }
 
 #[test]
 fn enclosed_or_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -104,14 +106,14 @@ fn enclosed_or_filter(){
                            ] 
            }
        ),
-        filter("(student=eq.true|age=lt.13)"))
+        filter("(student=eq.true|age=lt.13)".as_bytes()))
 }
 
 #[test]
 #[should_panic] // FIXME: should not panic!
 fn enclosed_or_filter2(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -131,14 +133,14 @@ fn enclosed_or_filter2(){
                            ] 
            }
        ),
-        filter("(student=eq.true|age=lt.13)|grade=lt.3"))
+        filter("(student=eq.true|age=lt.13)|grade=lt.3".as_bytes()))
 }
 
 #[test]
 fn and_and_filter(){
-    println!("{:#?}", filter("student=eq.true&age=lt.13&grade=gte.3"));
+    println!("{:#?}", filter("student=eq.true&age=lt.13&grade=gte.3".as_bytes()));
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -169,13 +171,13 @@ fn and_and_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true&age=lt.13&grade=gte.3"))
+        filter("student=eq.true&age=lt.13&grade=gte.3".as_bytes()))
 }
 
 #[test]
 fn or_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -195,13 +197,13 @@ fn or_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true|age=lt.13"))
+        filter("student=eq.true|age=lt.13".as_bytes()))
 }
 
 #[test]
 fn function_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -224,14 +226,14 @@ fn function_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true|max(age)=lt.13"))
+        filter("student=eq.true|max(age)=lt.13".as_bytes()))
 }
 
 
 #[test]
 fn recursive_function_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -257,14 +259,14 @@ fn recursive_function_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true|max(sum(age))=lt.13"))
+        filter("student=eq.true|max(sum(age))=lt.13".as_bytes()))
 }
 
 #[test]
 fn or_or_filter(){
-    println!("{:#?}",filter("student=eq.true|age=lt.13|grade=gte.3"));
+    println!("{:#?}",filter("student=eq.true|age=lt.13|grade=gte.3".as_bytes()));
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -295,15 +297,15 @@ fn or_or_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true|age=lt.13|grade=gte.3"))
+        filter("student=eq.true|age=lt.13|grade=gte.3".as_bytes()))
 }
 
 
 #[test]
 fn and_or_filter(){
-    println!("{:#?}",filter("student=eq.true&age=lt.13|grade=gte.3"));
+    println!("{:#?}",filter("student=eq.true&age=lt.13|grade=gte.3".as_bytes()));
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -334,14 +336,14 @@ fn and_or_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true&age=lt.13|grade=gte.3"))
+        filter("student=eq.true&age=lt.13|grade=gte.3".as_bytes()))
 }
 
 
 #[test]
 fn or_and_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -372,14 +374,14 @@ fn or_and_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true|age=lt.13&grade=gte.3"))
+        filter("student=eq.true|age=lt.13&grade=gte.3".as_bytes()))
 }
 
 
 #[test]
 fn enclosed_or_and_filter(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -410,14 +412,14 @@ fn enclosed_or_and_filter(){
                            ] 
            }
        ),
-        filter("student=eq.true|(age=lt.13&grade=gte.3)"))
+        filter("student=eq.true|(age=lt.13&grade=gte.3)".as_bytes()))
 }
 
 
 #[test]
 fn enclosed_or_and_filter2(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -448,13 +450,13 @@ fn enclosed_or_and_filter2(){
                            ] 
            }
        ),
-        filter("student=eq.true&(age=lt.13|grade=gte.3)"))
+        filter("student=eq.true&(age=lt.13|grade=gte.3)".as_bytes()))
 }
 
 #[test]
 fn or_and_filter_with_function(){
     assert_eq!(
-       Ok(
+       IResult::Done("".as_bytes(), 
            Filter { 
                connector: None, 
                condition: Condition { 
@@ -488,33 +490,33 @@ fn or_and_filter_with_function(){
                            ] 
            }
        ),
-        filter("student=eq.true|age=lt.13&min(grade)=gte.3"))
+        filter("student=eq.true|age=lt.13&min(grade)=gte.3".as_bytes()))
 }
 
 #[test]
 fn equal_filter(){
-    assert_eq!(filter("student=eq.true"),filter("((student=eq.true))"))
+    assert_eq!(filter("student=eq.true".as_bytes()),filter("((student=eq.true))".as_bytes()))
 }
 
 #[test]
 fn equal_and_and(){
-    assert_eq!(filter("student=eq.true&(age=lt.13&grade=gte.3)"),filter("student=eq.true&age=lt.13&grade=gte.3"))
+    assert_eq!(filter("student=eq.true&(age=lt.13&grade=gte.3)".as_bytes()),filter("student=eq.true&age=lt.13&grade=gte.3".as_bytes()))
 }
 
 #[test]
 fn equal_or_or(){
-    assert_eq!(filter("student=eq.true|(age=lt.13|grade=gte.3)"),filter("student=eq.true|age=lt.13|grade=gte.3"))
+    assert_eq!(filter("student=eq.true|(age=lt.13|grade=gte.3)".as_bytes()),filter("student=eq.true|age=lt.13|grade=gte.3".as_bytes()))
 }
 
 
 #[test]
 fn equal_enclosed_or(){
-    assert_eq!(filter("(student=eq.true|age=lt.13)"),filter("student=eq.true|age=lt.13"))
+    assert_eq!(filter("(student=eq.true|age=lt.13)".as_bytes()),filter("student=eq.true|age=lt.13".as_bytes()))
 }
 
 #[test]
 fn equal_enclosed_and(){
-    assert_eq!(filter("(student=eq.true&age=lt.13)"),filter("student=eq.true&age=lt.13"))
+    assert_eq!(filter("(student=eq.true&age=lt.13)".as_bytes()),filter("student=eq.true&age=lt.13".as_bytes()))
 }
 
 

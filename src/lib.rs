@@ -1,10 +1,12 @@
-#![feature(plugin)]
-#![plugin(peg_syntax_ext)]
+#[macro_use]
+extern crate nom;
 
-pub use self::param::*;
+use std::str::{self,FromStr};
+use nom::{IResult,digit,alphanumeric,anychar,is_alphanumeric};
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Equation {
     pub left: Operand,
     pub right: Operand,
@@ -12,6 +14,7 @@ pub struct Equation {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Function {
     pub function: String,
     pub params: Vec<Operand>,
@@ -19,6 +22,7 @@ pub struct Function {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum Operand {
     Column(String),
     Function(Function),
@@ -43,12 +47,14 @@ impl Operand{
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum Connector {
     AND,
     OR,
 }
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum Direction {
     ASC,
     DESC,
@@ -56,6 +62,7 @@ pub enum Direction {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum NullsWhere {
     FIRST,
     LAST,
@@ -63,6 +70,7 @@ pub enum NullsWhere {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Order {
     pub operand: Operand,
     pub direction: Option<Direction>,
@@ -71,6 +79,7 @@ pub struct Order {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum Equality {
     EQ, // = ,  eq
     NEQ, // != , neq
@@ -89,6 +98,7 @@ pub enum Equality {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Condition {
     pub left: Operand,
     pub equality: Equality,
@@ -97,23 +107,18 @@ pub struct Condition {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Filter {
     pub connector: Option<Connector>,
     pub condition: Condition,
     pub sub_filters: Vec<Filter>,
 }
 
-#[derive(Debug)]
-#[derive(PartialEq)]
-pub struct Params {
-    pub filters: Vec<Filter>,
-    pub equations: Vec<Equation>,
-}
-
 
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Default)]
+#[derive(Clone)]
 pub struct Query {
     pub from: Vec<Operand>,
     pub join: Vec<Join>,
@@ -128,6 +133,7 @@ pub struct Query {
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Default)]
+#[derive(Clone)]
 pub struct Page {
     pub page: i64,
     pub page_size: i64,
@@ -136,6 +142,7 @@ pub struct Page {
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Default)]
+#[derive(Clone)]
 pub struct Limit {
     pub limit: i64,
     pub offset: Option<i64>,
@@ -143,6 +150,7 @@ pub struct Limit {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum Range {
     Page(Page),
     Limit(Limit),
@@ -151,6 +159,7 @@ pub enum Range {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum JoinType {
     CROSS,
     INNER,
@@ -159,6 +168,7 @@ pub enum JoinType {
 }
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum Modifier {
     LEFT,
     RIGHT,
@@ -167,6 +177,7 @@ pub enum Modifier {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Join {
     pub modifier: Option<Modifier>,
     pub join_type: Option<JoinType>,
@@ -175,302 +186,450 @@ pub struct Join {
     pub column2: Vec<String>,
 }
 
-peg! param(r#"
-use super::*;
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+#[derive(Clone)]
+pub enum Param{
+    Condition(Condition),
+    Equation(Equation)
+}
 
 
-#[pub]
-name -> String
-  	= [a-zA-Z0-9_\- ]+ { match_str.to_string() }
+named!(pub value<&str>, 
+  map_res!(complete!(recognize!(many1!(is_not_s!(")"))))
+    ,str::from_utf8
+  )
+);
 
-#[pub]
-number -> f64
-    = "-"? int frac? exp? {match_str.parse().unwrap()}
+named!(pub column<&str>, 
+  map_res!(recognize!(many1!(one_of!("abcdefghijklmnopqrstuvwxyz0123456789_.")))
+    ,str::from_utf8
+  )
+);
 
-int -> i64
-	= [0-9]{1,} {match_str.parse().unwrap()}
+named!(pub column_only<&str>, 
+  map_res!(recognize!(many1!(one_of!("abcdefghijklmnopqrstuvwxyz0123456789_")))
+    ,str::from_utf8
+  )
+);
 
-exp -> String
-    = ("e" / "E") ("-" / "+")? [0-9]{1,} { match_str.to_owned() }
+/*
+named!(column <&str>, map_res!(
+        complete!(alphanumeric),
+        str::from_utf8
+    )
+);
+*/
 
-frac -> f64
-    = "." [0-9]{1,} { match_str.parse().unwrap() }
+named!(pub boolean <bool>,
+    alt!(tag!("true") => {|_| true} |
+         tag!("false") => {|_| false}
+        )
+);
 
-#[pub]
-boolean -> bool
-	= "true" { true }
-	/ "false" { false }
+named!(pub from <Vec<Operand>>,
+    do_parse!(
+        tag!("from=") >>
+        table: many1!(column) >> 
+        ({
+            let mut tables = vec![];
+                for tbl in table{
+                    tables.push(Operand::Column(tbl.to_string())) 
+                }
+                tables
+        })
+    )
+);
 
-#[pub]
-column_name -> String
-	= t:name "." d:!direction c:name { format!("{}.{}", t, c) }
-	/ c:name  { format!("{}", c) }
 
-#[pub]
-equation -> Equation
-    = l:operand "=" r:operand { Equation{left:l, right:r} }
+named!(modifier <Modifier>,
+    alt_complete!(
+        tag!("left") => {|_| Modifier::LEFT } |
+        tag!("right") => {|_| Modifier::RIGHT } |
+        tag!("full") => {|_| Modifier::FULL }
+    )
+);
 
-#[pub]
-operand -> Operand
-	= b:boolean { Operand::Boolean(b) }
-	/ n:number { Operand::Number(n as f64) }
-	/ f:function { Operand::Function(f) }
-	/ c:column_name { Operand::Column(c) }
-    / "\[" v:name "\]" {Operand::Value(v) }
-
-#[pub]
-function -> Function
-	= f:name "(" p:operand ")" { Function {function: f, params: vec![p]}}
-
-#[pub]
-equality -> Equality
-	= "eq"     { Equality::EQ }
-	/ "neq"    { Equality::NEQ }
-	/ "lt" e:"e"?     {
-			match e {
-				None => Equality::LT,
-				Some(e) => Equality::LTE,
-			}
-	}
-	/ "gt" e:"e"?     {
-			match e {
-				None => Equality::GT,
-				Some(e) => Equality::GTE,
-			}
-	}
-    / "in"     { Equality::IN }
-    / "not_in" { Equality::NOT_IN }
-    / "is" _not:"_not"?     {
-			match _not {
-				None => Equality::IS,
-				Some(e) => Equality::IS_NOT,
-			}
-	}
-    / "like"   { Equality::LIKE }
-    / "ilike"   { Equality::ILIKE }
-    / "st"  {Equality::ST}
-
-#[pub]
-condition -> Condition
-	= l:operand "=" eq:equality "." r:operand {
-        if eq == Equality::ST{
-		    Condition{left: l, equality: Equality::ILIKE, right: r.value_append("%")}
-        }else{
-		    Condition{left: l, equality: eq, right: r}
+named!(pub join <Join>,
+    do_parse!(
+        md: opt!(
+                do_parse!(
+                    md: modifier >> 
+                    tag!("_") >> 
+                    (md)
+                )
+            ) >>
+        tag!("join=") >>
+        table: column >>
+        on:many1!(
+            do_parse!(
+                tag!("&on=") >>
+                col1: column >>
+                tag!("=") >>
+                col2: column>>
+                (col1, col2)
+            )
+        )>>
+        ({
+        let mut col1 = vec![];
+        let mut col2 = vec![];
+        for (c1,c2) in on{
+           col1.push(c1.to_string());
+           col2.push(c2.to_string());
         }
-	}
+        Join{
+            modifier: md,
+            join_type: None,
+            table: Operand::Column(table.to_string()),
+            column1: col1,
+            column2: col2 
+        }}) 
+    )
+);
 
-#[pub]
-direction -> Direction
-	= "asc" { Direction::ASC }
-	/ "desc" { Direction::DESC }
+named!(pub number<f64>,
+    map_res!(
+      map_res!(
+        ws!(digit),
+        str::from_utf8
+      ),
+      FromStr::from_str
+    )
+);
 
-#[pub]
-nulls_where -> NullsWhere
-	= "nullsfirst" { NullsWhere::FIRST }
-	/ "nullslast" { NullsWhere::LAST }
+named!(pub operand <Operand>,
+   alt_complete!(
+        float => {|f| Operand::Number(f as f64)} |
+        boolean => {|b| Operand::Boolean(b) } |
+        //column => {|c:&str| Operand::Column(c.to_string())} | //NOTE: assume the right value to be value, and the left to be always column
+        value => {|v:&str| {
+            match column(v.as_bytes()){
+                IResult::Done(rest,col) => {
+                    if rest == "".as_bytes(){
+                        Operand::Column(col.to_string())
+                    }else{
+                        Operand::Value(v.to_string()) 
+                    }
+                },
+                _ => Operand::Value(v.to_string())
+            }
+        }} |
+        function => {|f| Operand::Function(f)}
+   ) 
+);
 
-#[pub]
-order -> Order
-	= o:operand d:("." direction)? n:("." nulls_where)?  { Order{ operand: o, direction: d, nulls_where: n} }
-
-#[pub]
-order_by -> Vec<Order>
-	= "order_by" "=" o:order++ "," {o}
-
-#[pub]
-group_by -> Vec<Operand>
-	= "group_by" "=" fields:operand++ "," { fields }
-
-#[pub]
-from -> Vec<Operand>
-	= "from" "=" fr:operand++ "," { fr }
-
-modifier -> Modifier
-	= "left"  { Modifier::LEFT }
-	/ "right" { Modifier::RIGHT }
-	/ "full"  { Modifier::FULL }
-
-join_type -> JoinType
-    = "inner" { JoinType::INNER }
-    / "outer" { JoinType::OUTER }
-    / "cross" { JoinType::CROSS }
-    / "natural" { JoinType::NATURAL }
-
-modifier_join_type -> (Option<Modifier>, Option<JoinType>)
- = m:modifier "_" jt:join_type { ( Some(m), Some(jt) ) }
- / m:modifier  { ( Some(m), None ) }
- / jt:join_type  { ( None, Some(jt) ) }
-
-#[pub]
-join -> Join
- =  m_jt:modifier_join_type? "_"? "join" "=" t:operand on:and_on+ {
- 	let mut columns1 = vec![];
- 	let mut columns2 = vec![];
- 	for (c1,c2) in on{
- 		columns1.push(c1);
- 		columns2.push(c2);
- 	}
- 	let (m, jt) = match m_jt{
- 		Some( m_jt ) => m_jt,
- 		None => (None, None)
- 	};
- 	Join{
- 		modifier: m,
- 		join_type: jt,
- 		table: t,
- 		column1: columns1,
- 		column2: columns2
- 	}
- }
-
-and_join -> Vec<Join>
- = "&" j:join++"&" { j }
-
-and_on -> (String, String)
- = "&on=" c1:column_name "=" c2:column_name { (c1, c2) }
-
-#[pub]
-having -> Vec<Filter>
-	= "having" "=" f:filter { vec![f] }
-
-#[pub]
-page -> i64
-	= "page" "=" p:int { p }
-
-#[pub]
-page_size -> i64
-	= "page_size" "=" ps:int { ps }
-
-#[pub]
-limit -> i64
-	= "limit" "=" l:int { l }
-#[pub]
-offset -> i64
-	= "offset" "=" o:int { o }
-
-#[pub]
-range -> Range
-	= p:(page) ps:("&" page_size) {
-		Range::Page(Page{ page: p, page_size: ps})
-	}
-	/ l:(limit) o:("&" offset)? {
-		Range::Limit(Limit{ limit: l, offset: o})
-	}
+named!(pub equality<Equality>,
+    alt!(tag!("eq") => {|_| Equality::EQ} | 
+         tag!("neq") => {|_| Equality::NEQ} |
+         tag!("lt") => {|_| Equality::LT} |
+         tag!("lte") => {|_| Equality::LTE} |
+         tag!("gt") => {|_| Equality::GT} |
+         tag!("gte") => {|_| Equality::GTE} |
+         tag!("in") => {|_| Equality::IN} |
+         tag!("not_in") => {|_| Equality::NOT_IN} |
+         tag!("is") => {|_| Equality::IS} |
+         tag!("is_not") => {|_| Equality::IS_NOT} |
+         tag!("like") => {|_| Equality::LIKE} |
+         tag!("ilike") => {|_| Equality::ILIKE} |
+         tag!("st") => {|_| Equality::ST}
+    )
+);
 
 
-#[pub]
-connector -> Connector
-	= "&" { Connector::AND }
-	/ "|" { Connector::OR }
+named!(pub connector <Connector>,
+   alt!(tag!("&") => {|_| Connector::AND} |
+        tag!("|") => {|_| Connector::OR}
+   )
+);
 
-#[pub]
-filter -> Filter
-    = c: condition conn: connector f: filter {
-    	let rf = Filter{
-    		connector:Some(conn),
-    		condition: f.condition,
-    		sub_filters: f.sub_filters
-    	};
-		Filter{
-    		connector: None,
-    		condition: c,
-    		sub_filters: vec![rf]
-    	}
+named!(pub direction <Direction>,
+    alt_complete!(tag!("asc") => {|_| Direction::ASC} |
+         tag!("desc") => {|_| Direction::DESC} 
+    )
+);
+
+named!(pub nulls_where <NullsWhere>,
+    alt_complete!(tag!("nullsfirst") => {|_| NullsWhere::FIRST} |
+         tag!("nullslast") => {|_| NullsWhere::LAST}
+    )
+);
+
+/// hard to distinguest `column.direction` from `table.column`
+/// i.e: `person.age` and `age.desc`
+/// use strict `column_only` instead, which doesn't include `.`
+named!(pub order <Order>,
+    do_parse!(
+        col: column_only >>
+        dir: opt!(complete!(preceded!(tag!("."), direction))) >>
+        nulls: opt!(complete!(preceded!(tag!("."), nulls_where))) >>
+        (Order{
+            operand: Operand::Column(col.to_string()),
+            direction: dir,
+            nulls_where: nulls
+        })
+    )
+);
+
+named!(pub order_by <Vec<Order>>,
+    do_parse!(
+        tag!("order_by=") >>
+        orders: many1!(order) >>
+        (orders)
+    )
+);
+
+
+
+named!(pub param <Param>,
+    alt!(condition => {|c| Param::Condition(c)}| 
+         equation => {|e| Param::Equation(e)}
+    )
+);
+
+fn fold_conditions(initial: Condition, remainder: Vec<(Connector, Condition)>) -> Filter{
+    let mut sub_filters = vec![];
+    for (conn, cond) in remainder{
+        let sub_filter = Filter{
+                connector: Some(conn),
+                condition: cond,
+                sub_filters: vec![]
+            };
+        sub_filters.push(sub_filter);
     }
-    / "(" f:filter ")" {
-			f
-	}
-    / c: condition{
-    	Filter{
-    		connector: None,
-    		condition: c,
-    		sub_filters: vec![]
-    	}
+    Filter{
+        connector: None,
+        condition: initial,
+        sub_filters: sub_filters
     }
+}
+
+fn fold_filters(initial: Filter, remainder: Vec<(Connector, Filter)>) -> Filter{
+    let mut sub_filters = vec![];
+    for (conn, filtr) in remainder{
+        sub_filters.push(filtr);
+    }
+    let mut filter = initial.to_owned();
+    filter.sub_filters = sub_filters;
+    filter
+}
 
 
-and_equations -> Vec<Equation>
-	=  "&"? e:equation ** "&" { e }
+named!(pub filter <Filter>,
+    do_parse!(
+        initial: condition_expr >>
+        remainder: many0!(
+               do_parse!(
+                    conn: connector >>
+                    cond: condition_expr >> 
+                        (conn, cond)
+               )
+            )
+            >> (fold_conditions(initial, remainder))
+    )
+);
 
-and_filters -> Vec<Filter>
-	=  "&"? f:filter { vec![f] }
+named!(filter_expr <Filter>,
+    alt_complete!(filter | 
+        delimited!(tag!("("), filter_expr, tag!(")")) |
+        do_parse!(
+            initial: filter >>
+            remainder: many0!(
+                do_parse!(
+                    conn: connector >>
+                    filtr: filter_expr >>
+                        ( conn, filtr)
+                )
+            )
+            >> (fold_filters(initial, remainder))
+        )
+    )
+);
+    
 
-#[pub]
-params -> Params
- = f:and_filters? e:and_equations? {
- 	Params{
-     		filters: match f{
-     						Some(f)=> f,
-     						None => vec![]
- 						},
-     		equations: match e{
-     						Some(e)=> e,
-     						None => vec![]
- 						},
-     	}
- }
+named!(pub function <Function>,
+    do_parse!(
+        fnc: column >>
+        tag!("(") >>
+        p: many0!(operand) >>
+        tag!(")") >>
+        (Function{
+            function: fnc.to_string(),
+            params: p
+        }) 
+    )
+);
 
-#[pub]
-query -> Query
- = fr:from? j:and_join? f:and_filters? g:("&"? group_by)? h:("&"? having)? o:("&"? order_by)? r:("&"?range)? e:and_equations? {
- 	Query{
- 			from: match fr{
- 					Some(fr) => fr,
- 					None => vec![]
- 				},
- 			join: match j{
-     				Some(j) => j,
-     				None => vec![]
-     			},
-     		filters: match f{
-     						Some(f)=> f,
-     						None => vec![]
- 						},
-     		group_by: match g{
-     						Some(g)=> g,
-     						None => vec![]
- 						},
- 			having: match h{
- 					Some(h) => h,
- 					None => vec![]
- 			},
-     		order_by: match o{
-     						Some(o)=> o,
-     						None => vec![]
- 						},
- 			range: r,
-     		equations: match e{
-     						Some(e)=> e,
-     						None => vec![]
- 						},
-     	}
- }
-"#);
+named!(pub params < Vec<Param> >,
+    separated_list!(tag!("&"), param)
+);
+
+named!(pub equation <Equation>, 
+    map!(separated_pair!(column,
+        tag!("="),
+        operand 
+    ),
+    |(col,op):(&str,Operand)|{
+        Equation{
+            left: Operand::Column(col.to_string()),
+            right: op
+        }
+    }
+    )
+);
+
+
+named!(pub condition <Condition>,
+    map!(tuple!(
+        column,
+        tag!("="),
+        equality,
+        tag!("."),
+        operand
+    ),
+    |(col,_,eq,_,op):(&str,_,Equality,_,Operand)|{
+        Condition{
+            left: Operand::Column(col.to_string()),
+            equality: eq,
+            right: op
+        }
+    }
+    )
+);
+
+named!(pub condition_expr <Condition>,
+    alt_complete!(condition | complete!(delimited!(tag!("("), condition_expr, tag!(")"))))
+);
+
+named!(pub having <Vec<Filter>>,
+    preceded!(
+        tag!("having="),
+        many1!(filter)
+    )
+);
+
+named!(pub group_by <Vec<Operand>>,
+    preceded!(
+        tag!("group_by="),
+        many1!(operand)
+    )
+);
+
+named!(range <Range>,
+    alt_complete!(
+        do_parse!(
+            tag!("page=") >>
+            pg: number >>
+            tag!("&page_size=") >>
+            pg_sz: number >>
+            (Range::Page(
+                Page{
+                    page: pg as i64,
+                    page_size: pg_sz as i64
+                }
+            ))
+        ) |
+        do_parse!(
+           tag!("limit=") >>
+           lm: number >>
+           off: opt!(preceded!(tag!("&offset="),number)) >>
+           (Range::Limit(
+                Limit{
+                    limit: lm as i64,
+                    offset: off.map(|v| v as i64)
+                }
+            ))
+        )
+    )
+);
+
+named!(pub query <Query>,
+    do_parse!(
+        fr: opt!(from) >>
+        j: many0!(preceded!(opt!(tag!("&")),join)) >>
+        filtr: many0!(preceded!(opt!(tag!("&")),filter)) >>
+        g: opt!(preceded!(tag!("&"),group_by)) >> 
+        h: opt!(preceded!(tag!("&"), having)) >>
+        ord: opt!(preceded!(opt!(tag!("&")), order_by))>>
+        rng: opt!(preceded!(opt!(tag!("&")), range)) >>
+        eq: opt!(preceded!(tag!("&"), many0!(equation))) >>
+        (Query{
+            from: match fr{Some(fr)=>fr,None=>vec![]},
+            join: j,
+            filters: filtr,
+            group_by: match g{Some(g)=>g,None=>vec![]},
+            having: match h{Some(h)=>h,None=>vec![]},
+            order_by: match ord{Some(ord)=>ord,None=>vec![]},
+            range: rng,
+            equations: match eq{Some(eq)=>eq,None=>vec![]}
+        }
+        )
+    )
+);
+
+
+#[derive(Debug)]
+pub enum ParseError{
+    NomError(String)
+}
+
+pub fn parse(arg: &str) -> Result<Query, ParseError>{
+    match query(arg.as_bytes()){
+        IResult::Done(_,query) =>
+            Ok(query),
+        IResult::Error(e) =>
+            Err(ParseError::NomError(format!("{}",e))),
+        IResult::Incomplete(n)=>
+            Err(ParseError::NomError(format!("Incomplete: {:?}",n)))
+    }
+}
+
+
+named!(unsigned_float <f64>, map_res!(
+  map_res!(
+    recognize!(
+      alt_complete!(
+        delimited!(digit, tag!("."), opt!(complete!(digit))) |
+        delimited!(opt!(digit), tag!("."), complete!(digit)) |
+        complete!(digit)
+      )
+    ),
+    str::from_utf8
+  ),
+  FromStr::from_str
+));
+
+named!(float <f64>, map!(
+  pair!(
+    opt!(alt!(tag!("+") | tag!("-"))),
+    unsigned_float
+  ),
+  |(sign, value): (Option<&[u8]>, f64)| {
+    sign.and_then(|s| if s[0] == ('-' as u8) { Some(-1f64) } else { None }).unwrap_or(1f64) * value
+  }
+));
+
+
+
 
 #[test]
 fn test_boolean_true() {
-    assert_eq!(Ok(true), boolean("true"));
+    assert_eq!(IResult::Done("".as_bytes(), true), boolean("true".as_bytes()));
 }
 #[test]
 fn test_boolean_false() {
-    assert_eq!(Ok(false), boolean("false"));
+    assert_eq!(IResult::Done("".as_bytes(), false), boolean("false".as_bytes()));
 }
 
 #[test]
 fn test_number() {
-    assert_eq!(Ok(123f64), number("123"));
-}
-
-#[test]
-fn test_name() {
-    assert_eq!(Ok("age".to_owned()), name("age"));
+    assert_eq!(IResult::Done("".as_bytes(), 123f64), number("123".as_bytes()));
 }
 
 
 #[test]
 fn test_column() {
-    assert_eq!(Ok(Operand::Column("age".to_owned())), operand("age"));
+    assert_eq!(IResult::Done("".as_bytes(), Operand::Column("age".to_owned())), operand("age".as_bytes()));
 }
 
 
@@ -478,124 +637,124 @@ fn test_column() {
 
 #[test]
 fn test_table_column() {
-    assert_eq!(Ok(Operand::Column("person.age".to_owned())),
-               operand("person.age"));
+    assert_eq!(IResult::Done("".as_bytes(), Operand::Column("person.age".to_owned())),
+               operand("person.age".as_bytes()));
 }
 
 
 #[test]
 fn test_from() {
-    assert_eq!(Ok(vec![Operand::Column("person".to_owned())]),
-               from("from=person"));
+    assert_eq!(IResult::Done("".as_bytes(), vec![Operand::Column("person".to_owned())]),
+               from("from=person".as_bytes()));
 }
 
 #[test]
 fn test_left_join() {
-    assert_eq!(Ok(Join {
+    assert_eq!(IResult::Done("".as_bytes(), Join {
                    modifier: Some(Modifier::LEFT),
                    join_type: None,
                    table: Operand::Column("person".to_owned()),
                    column1: vec!["person.student_id".to_owned()],
                    column2: vec!["student.id".to_owned()],
                }),
-               join("left_join=person&on=person.student_id=student.id"));
+               join("left_join=person&on=person.student_id=student.id".as_bytes()));
 }
 
 
 #[test]
 fn test_join() {
-    assert_eq!(Ok(Join {
+    assert_eq!(IResult::Done("".as_bytes(), Join {
                    modifier: None,
                    join_type: None,
                    table: Operand::Column("bazaar.person".to_owned()),
                    column1: vec!["person.student_id".to_owned()],
                    column2: vec!["student.id".to_owned()],
                }),
-               join("join=bazaar.person&on=person.student_id=student.id"));
+               join("join=bazaar.person&on=person.student_id=student.id".as_bytes()));
 }
 
 
 #[test]
 #[should_panic]
 fn test_join_without_on() {
-    assert_eq!(Ok(Join {
+    assert_eq!(IResult::Done("".as_bytes(), Join {
                    modifier: None,
                    join_type: None,
                    table: Operand::Column("bazaar.person".to_owned()),
                    column1: vec!["person.student_id".to_owned()],
                    column2: vec!["student.id".to_owned()],
                }),
-               join("join=bazaar.person"));
+               join("join=bazaar.person".as_bytes()));
 }
 
 
 #[test]
 fn test_function() {
-    assert_eq!(Ok(Function {
+    assert_eq!(IResult::Done("".as_bytes(), Function {
                    function: "min".to_owned(),
                    params: vec![Operand::Column("age".to_owned())],
                }),
-               function("min(age)"));
+               function("min(age)".as_bytes()));
 }
 
 #[test]
 fn test_order() {
-    assert_eq!(Ok(Order {
+    assert_eq!(IResult::Done("".as_bytes(), Order {
                    operand: Operand::Column("age".to_owned()),
                    direction: Some(Direction::DESC),
                    nulls_where: None,
                }),
-               order("age.desc"));
+               order("age.desc".as_bytes()));
 }
 
 
 
 #[test]
 fn test_euqation() {
-    assert_eq!(Ok(Equation {
+    assert_eq!(IResult::Done("".as_bytes(), Equation {
                    left: Operand::Column("x".to_owned()),
                    right: Operand::Number(123f64),
                }),
-               equation("x=123"));
+               equation("x=123".as_bytes()));
 }
 
 
 
 #[test]
 fn test_condition() {
-    assert_eq!(Ok(Condition {
+    assert_eq!(IResult::Done("".as_bytes(),Condition {
                    left: Operand::Column("age".to_owned()),
                    equality: Equality::EQ,
                    right: Operand::Number(13f64),
                }),
-               condition("age=eq.13"));
+               condition("age=eq.13".as_bytes()));
 }
 
 #[test]
 fn test_starts_with() {
-    assert_eq!(Ok(Condition {
+    assert_eq!(IResult::Done("".as_bytes(),Condition {
                    left: Operand::Column("name".to_owned()),
-                   equality: Equality::ILIKE,
-                   right: Operand::Value("le%".to_string()),
+                   equality: Equality::ST,
+                   right: Operand::Column("le".to_string()),
                }),
-               condition("name=st.le"));
+               condition("name=st.le".as_bytes()));
 }
 
 #[test]
 fn test_percent20() {
     let url = "name=st.lee cesar";
     println!("url: {}", url);
-    assert_eq!(Ok(Condition {
+    assert_eq!(IResult::Done("".as_bytes(),Condition {
                    left: Operand::Column("name".to_owned()),
-                   equality: Equality::ILIKE,
-                   right: Operand::Value("lee cesar%".to_string()),
+                   equality: Equality::ST,
+                   right: Operand::Value("lee cesar".to_string()),
                }),
-               condition(url));
+               condition(url.as_bytes()));
 }
 
 #[test]
 fn test_filter() {
-    assert_eq!(Ok(Filter {
+    assert_eq!(IResult::Done("".as_bytes(),Filter {
                    connector: None,
                    condition: Condition {
                        left: Operand::Column("student".to_owned()),
@@ -604,63 +763,18 @@ fn test_filter() {
                    },
                    sub_filters: vec![],
                }),
-               filter("student=eq.true"))
+               filter("student=eq.true".as_bytes()))
 }
 
 
 
 
-
-#[test]
-fn test_params() {
-    assert_eq!(Ok(Params {
-                   filters: vec![Filter {
-                                     connector: None,
-                                     condition: Condition {
-                                         left: Operand::Column("age".to_owned()),
-                                         equality: Equality::LT,
-                                         right: Operand::Number(13f64),
-                                     },
-                                     sub_filters: vec![
-                                Filter {
-                                    connector: Some(
-                                        Connector::AND
-                                    ),
-                                    condition: Condition {
-                                        left: Operand::Column("student".to_owned()),
-                                        equality: Equality::EQ,
-                                        right: Operand::Boolean(true)
-                                    },
-                                    sub_filters: vec![
-                                        Filter {
-                                            connector: Some(
-                                                Connector::OR
-                                            ),
-                                            condition: Condition {
-                                                left: Operand::Column("gender".to_owned()),
-                                                equality: Equality::EQ,
-                                                right: Operand::Column("M".to_owned())
-                                            },
-                                            sub_filters: vec![]
-                                        }
-                                    ]
-                                },
-                                
-                            ],
-                                 }],
-                   equations: vec![Equation {
-                                       left: Operand::Column("x".to_owned()),
-                                       right: Operand::Number(123f64),
-                                   }],
-               }),
-               params("age=lt.13&student=eq.true|gender=eq.M&x=123"));
-}
 
 
 
 #[test]
 fn test_query() {
-    assert_eq!(Ok(Query {
+    assert_eq!(IResult::Done("".as_bytes(), Query {
                    filters: vec![Filter {
                                      connector: None,
                                      condition: Condition {
@@ -739,51 +853,6 @@ fn test_query() {
                }),
                query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,\
                       gender&having=min(age)=gt.13&order_by=age.desc,height.\
-                      asc&limit=100&offset=25&x=123&y=456"));
+                      asc&limit=100&offset=25&x=123&y=456".as_bytes()));
 }
 
-// #[test]
-fn test_params_with_string() {
-    assert_eq!(Ok(Params {
-                   filters: vec![Filter {
-                                     connector: None,
-                                     condition: Condition {
-                                         left: Operand::Column("age".to_owned()),
-                                         equality: Equality::LT,
-                                         right: Operand::Number(13f64),
-                                     },
-                                     sub_filters: vec![
-                                Filter {
-                                    connector: Some(
-                                        Connector::AND
-                                    ),
-                                    condition: Condition {
-                                        left: Operand::Column("student".to_owned()),
-                                        equality: Equality::EQ,
-                                        right: Operand::Boolean(true)
-                                    },
-                                    sub_filters: vec![
-                                        Filter {
-                                            connector: Some(
-                                                Connector::OR
-                                            ),
-                                            condition: Condition {
-                                                left: Operand::Column("gender".to_owned()),
-                                                equality: Equality::EQ,
-                                                right: Operand::Column("M".to_owned())
-                                            },
-                                            sub_filters: vec![]
-                                        }
-                                    ]
-                                },
-                                
-                            ],
-                                 }],
-                   equations: vec![Equation {
-                                       left: Operand::Column("x".to_owned()),
-                                       right: Operand::Number(123f64),
-                                   }],
-               }),
-               params("age=eq.f7521093-734d-488a-9f60-fc9f11f7e750&student=eq.true|gender=eq.\
-                       M&x=123"));
-}

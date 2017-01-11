@@ -1,12 +1,15 @@
 extern crate inquerest;
 
+extern crate nom;
+
 use inquerest::*;
+use nom::IResult;
 
 
 #[test]
 fn test_limit_only(){
 	assert_eq!(
-		Ok(
+		IResult::Done("".as_bytes(), 
 		Query{
 			range: Some(
 				Range::Limit(
@@ -18,12 +21,12 @@ fn test_limit_only(){
 			),
 			..Default::default()
 		}),
-	inquerest::query("limit=5"))
+	inquerest::query("limit=5".as_bytes()))
 }
 #[test]
 fn test_limit_and_offset(){
 	assert_eq!(
-		Ok(
+		IResult::Done("".as_bytes(), 
 		Query{
 			range: Some(
 				Range::Limit(
@@ -35,13 +38,13 @@ fn test_limit_and_offset(){
 			),
 			..Default::default()
 		}),
-	inquerest::query("limit=5&offset=10"))
+	inquerest::query("limit=5&offset=10".as_bytes()))
 }
 
 #[test]
 fn test_filters(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     filters: vec![
                         Filter {
@@ -83,14 +86,14 @@ fn test_filters(){
                 }
             )
         
-        , query("age=lt.13&student=eq.true|gender=eq.M"));
+        , query("age=lt.13&student=eq.true|gender=eq.M".as_bytes()));
 }
 
 
 #[test]
 fn test_filter_orderby(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     filters: vec![
                         Filter {
@@ -136,14 +139,14 @@ fn test_filter_orderby(){
                 }
             )
         
-        , query("age=lt.13&(student=eq.true|gender=eq.M)&order_by=age.desc,height.asc"));
+        , query("age=lt.13&(student=eq.true|gender=eq.M)&order_by=age.desc,height.asc".as_bytes()));
 }
 
 
 #[test]
 fn test_filter_groupby_orderby(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     filters: vec![
                         Filter {
@@ -199,7 +202,7 @@ fn test_filter_groupby_orderby(){
                 }
             )
         
-        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&order_by=age.desc,height.asc"));
+        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&order_by=age.desc,height.asc".as_bytes()));
 }
 
 
@@ -208,7 +211,7 @@ fn test_filter_groupby_orderby(){
 #[test]
 fn test_equations_filter_groupby_orderby(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     filters: vec![
                         Filter {
@@ -268,7 +271,7 @@ fn test_equations_filter_groupby_orderby(){
                 }
             )
         
-        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&order_by=age.desc,height.asc&x=123&y=456"));
+        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&order_by=age.desc,height.asc&x=123&y=456".as_bytes()));
 }
 
 
@@ -276,31 +279,31 @@ fn test_equations_filter_groupby_orderby(){
 #[test]
 fn test_orderby(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     order_by: vec![Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }],
                     ..Default::default()
                 }
             )
         
-        , query("order_by=height.asc"));
+        , query("order_by=height.asc".as_bytes()));
 }
 #[test]
 fn test_orderby_nullsfirst(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     order_by: vec![Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: Some(NullsWhere::FIRST) }],
                     ..Default::default()
                 }
             )
         
-        , query("order_by=height.asc.nullsfirst"));
+        , query("order_by=height.asc.nullsfirst".as_bytes()));
 }
 #[test]
 fn test_orderby2(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     order_by: vec![
                         Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None },
@@ -310,27 +313,27 @@ fn test_orderby2(){
                 }
             )
         
-        , query("order_by=height.asc,grade.desc"));
+        , query("order_by=height.asc,grade.desc".as_bytes()));
 }
 
 
 #[test]
 fn test_groupby(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     group_by: vec![Operand::Column("height".to_owned())],
                     ..Default::default()
                 }
             )
         
-        , query("group_by=height"));
+        , query("group_by=height".as_bytes()));
 }
 
 #[test]
 fn test_groupby2(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     group_by: vec![
                         Operand::Function(Function { 
@@ -343,7 +346,7 @@ fn test_groupby2(){
                 }
             )
         
-        , query("group_by=avg(grade),height"));
+        , query("group_by=avg(grade),height".as_bytes()));
 }
 
 
@@ -351,7 +354,7 @@ fn test_groupby2(){
 #[test]
 fn test_groupby_orderby(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     order_by: vec![
                         Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None },
@@ -368,7 +371,7 @@ fn test_groupby_orderby(){
                 }
             )
         
-        , query("group_by=avg(grade),height&order_by=height.asc,grade.desc"));
+        , query("group_by=avg(grade),height&order_by=height.asc,grade.desc".as_bytes()));
 }
 
 
@@ -378,7 +381,7 @@ fn test_groupby_orderby(){
 #[test]
 fn test_equations_filter_groupby_having_orderby(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     filters: vec![
                         Filter {
@@ -452,7 +455,7 @@ fn test_equations_filter_groupby_having_orderby(){
                 }
             )
         
-        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&x=123&y=456"));
+        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&x=123&y=456".as_bytes()));
 }
 
 
@@ -462,7 +465,7 @@ fn test_equations_filter_groupby_having_orderby(){
 #[test]
 fn test_equations_filter_groupby_having_orderby_page(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     filters: vec![
                         Filter {
@@ -537,7 +540,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
                 }
             )
         
-        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&page=20&page_size=100&x=123&y=456"));
+        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&page=20&page_size=100&x=123&y=456".as_bytes()));
 }
 
 
@@ -546,7 +549,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
 #[test]
 fn test_equations_filter_groupby_having_orderby_limit(){
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     filters: vec![
                         Filter {
@@ -621,7 +624,7 @@ fn test_equations_filter_groupby_having_orderby_limit(){
                 }
             )
         
-        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
+        , query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456".as_bytes()));
 }
 
 
@@ -632,10 +635,10 @@ fn test_equations_filter_groupby_having_orderby_limit(){
 #[test]
 fn test_equations_from_join_filter_groupby_having_orderby_limit(){
     
-    println!("{:#?}",query("from=bazaar.person,student&left_join=person_student&on=student.id=person.student_id&age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
+    println!("{:#?}",query("from=bazaar.person,student&left_join=person_student&on=student.id=person.student_id&age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456".as_bytes()));
     
     assert_eq!(
-        	Ok(
+        	IResult::Done("".as_bytes(), 
                 Query {
                     from: vec![
                             Operand::Column(
@@ -735,42 +738,22 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
                 }
             )
         
-        , query("from=bazaar.person,student&left_join=person_student&on=student.id=person.student_id&age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456"));
+        , query("from=bazaar.person,student&left_join=person_student&on=student.id=person.student_id&age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&limit=100&offset=25&x=123&y=456".as_bytes()));
 }
 
 
 #[test]
 fn test_one_equation_only(){
     let arg = "focused_record=f5f031e2-0d3d-11e6-ae81-1c6f65c301cc";
-    let result = query(arg);
+    let result = parse(arg);
     assert!(result.is_ok())
 }
 
-#[test]
-fn test_valid_name(){
-   let arg = "85ea7227-e31e-41af-955e-0513177ddb9a";
-    let result = name(arg);
-    assert!(result.is_ok())
-}
-#[test]
-fn test_valid_column_name(){
-   let arg = "85ea7227-e31e-41af-955e-0513177ddb9a";
-    let result = column_name(arg);
-    assert!(result.is_ok())
-}
-
-#[test]
-fn test_valid_operand(){
-   let arg = "[85ea7227-e31e-41af-955e-0513177ddb9a]";
-    let result = operand(arg);
-    println!("result: {:?}", result);
-    assert!(result.is_ok())
-}
 
 #[test]
 fn test_valid_operand_qouted(){
    let arg = "focused_record=[85ea7227-e31e-41af-955e-0513177ddb9a]";
-    let result = query(arg);
+    let result = parse(arg);
     println!("result: {:?}", result);
     assert!(result.is_ok())
 }
@@ -778,7 +761,7 @@ fn test_valid_operand_qouted(){
 #[test]
 fn test_focused(){
     let arg = "focused=0";
-    let result = query(arg);
+    let result = parse(arg);
     assert!(result.is_ok())
 }
 
