@@ -541,8 +541,8 @@ named!(pub range <Range>,
 named!(pub query <Query>,
     do_parse!(
         fr: opt!(from) >>
-        j: many0!(preceded!(opt!(tag!("&")),join)) >>
-        filtr: many0!(preceded!(opt!(tag!("&")),filter)) >>
+        j: complete!(many0!(preceded!(opt!(tag!("&")),join))) >>
+        filtr: complete!(many0!(preceded!(opt!(tag!("&")),filter))) >>
         g: opt!(preceded!(tag!("&"),group_by)) >> 
         h: opt!(preceded!(tag!("&"), having)) >>
         ord: opt!(preceded!(tag!("&"), order_by))>>
