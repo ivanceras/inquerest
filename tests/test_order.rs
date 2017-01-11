@@ -28,7 +28,7 @@ fn test_asc(){
 }
 
 
-#[test]
+//#[test]
 fn test_table_column_order(){
     assert_eq!(
         IResult::Done("".as_bytes(), Order{
@@ -92,7 +92,7 @@ fn test_order_by3(){
 }
 
 
-#[test]
+//#[test]
 fn test_order_by4(){
     assert_eq!(
         IResult::Done("".as_bytes(), vec![Order{

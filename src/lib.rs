@@ -197,7 +197,7 @@ pub enum Param{
 
 
 named!(pub value<&str>, 
-  map_res!(complete!(recognize!(many1!(is_not_s!(")"))))
+  map_res!(complete!(recognize!(many1!(is_not_s!("()&|,="))))
     ,str::from_utf8
   )
 );
@@ -303,6 +303,7 @@ named!(pub operand <Operand>,
         float => {|f| Operand::Number(f as f64)} |
         boolean => {|b| Operand::Boolean(b) } |
         //column => {|c:&str| Operand::Column(c.to_string())} | //NOTE: assume the right value to be value, and the left to be always column
+        function => {|f| Operand::Function(f)} |
         value => {|v:&str| {
             match column(v.as_bytes()){
                 IResult::Done(rest,col) => {
@@ -314,18 +315,17 @@ named!(pub operand <Operand>,
                 },
                 _ => Operand::Value(v.to_string())
             }
-        }} |
-        function => {|f| Operand::Function(f)}
+        }} 
    ) 
 );
 
 named!(pub equality<Equality>,
     alt!(tag!("eq") => {|_| Equality::EQ} | 
          tag!("neq") => {|_| Equality::NEQ} |
-         tag!("lt") => {|_| Equality::LT} |
          tag!("lte") => {|_| Equality::LTE} |
-         tag!("gt") => {|_| Equality::GT} |
+         tag!("lt") => {|_| Equality::LT} |
          tag!("gte") => {|_| Equality::GTE} |
+         tag!("gt") => {|_| Equality::GT} |
          tag!("in") => {|_| Equality::IN} |
          tag!("not_in") => {|_| Equality::NOT_IN} |
          tag!("is") => {|_| Equality::IS} |
@@ -374,7 +374,7 @@ named!(pub order <Order>,
 named!(pub order_by <Vec<Order>>,
     do_parse!(
         tag!("order_by=") >>
-        orders: many1!(order) >>
+        orders: separated_nonempty_list!(tag!(","),order) >>
         (orders)
     )
 );
@@ -465,35 +465,30 @@ named!(pub params < Vec<Param> >,
 );
 
 named!(pub equation <Equation>, 
-    map!(separated_pair!(column,
-        tag!("="),
-        operand 
-    ),
-    |(col,op):(&str,Operand)|{
-        Equation{
+    do_parse!(
+        col:column >>
+        tag!("=") >>
+        r: operand >>
+        (Equation{
             left: Operand::Column(col.to_string()),
-            right: op
-        }
-    }
+            right: r
+        })
     )
 );
 
 
 named!(pub condition <Condition>,
-    map!(tuple!(
-        column,
-        tag!("="),
-        equality,
-        tag!("."),
-        operand
-    ),
-    |(col,_,eq,_,op):(&str,_,Equality,_,Operand)|{
-        Condition{
-            left: Operand::Column(col.to_string()),
+    do_parse!(
+        l: operand >>
+        tag!("=") >>
+        eq:equality >>
+        tag!(".") >>
+        r: operand >>
+        (Condition{
+            left: l, //Operand::Column(l.to_string()),
             equality: eq,
-            right: op
-        }
-    }
+            right: r
+        })
     )
 );
 
@@ -504,18 +499,18 @@ named!(pub condition_expr <Condition>,
 named!(pub having <Vec<Filter>>,
     preceded!(
         tag!("having="),
-        many1!(filter)
+        many1!(filter_expr)
     )
 );
 
 named!(pub group_by <Vec<Operand>>,
     preceded!(
         tag!("group_by="),
-        many1!(operand)
+        separated_nonempty_list!(tag!(","),operand)
     )
 );
 
-named!(range <Range>,
+named!(pub range <Range>,
     alt_complete!(
         do_parse!(
             tag!("page=") >>
@@ -532,7 +527,7 @@ named!(range <Range>,
         do_parse!(
            tag!("limit=") >>
            lm: number >>
-           off: opt!(preceded!(tag!("&offset="),number)) >>
+           off: opt!(complete!(preceded!(tag!("&offset="),number))) >>
            (Range::Limit(
                 Limit{
                     limit: lm as i64,
@@ -550,9 +545,9 @@ named!(pub query <Query>,
         filtr: many0!(preceded!(opt!(tag!("&")),filter)) >>
         g: opt!(preceded!(tag!("&"),group_by)) >> 
         h: opt!(preceded!(tag!("&"), having)) >>
-        ord: opt!(preceded!(opt!(tag!("&")), order_by))>>
-        rng: opt!(preceded!(opt!(tag!("&")), range)) >>
-        eq: opt!(preceded!(tag!("&"), many0!(equation))) >>
+        ord: opt!(preceded!(tag!("&"), order_by))>>
+        rng: opt!(preceded!(tag!("&"), range)) >>
+        eq: opt!(preceded!(tag!("&"), separated_list!(tag!("&"),equation))) >>
         (Query{
             from: match fr{Some(fr)=>fr,None=>vec![]},
             join: j,
@@ -774,6 +769,12 @@ fn test_filter() {
 
 #[test]
 fn test_query() {
+    let arg = "age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,\
+                      gender&having=min(age)=gt.13&order_by=age.desc,height.\
+                      asc&limit=100&offset=25&x=123&y=456";
+    println!("{}\n", arg);
+    let result = query(arg.as_bytes());
+    println!("{:#?}\n",result);
     assert_eq!(IResult::Done("".as_bytes(), Query {
                    filters: vec![Filter {
                                      connector: None,
@@ -783,16 +784,17 @@ fn test_query() {
                                          right: Operand::Number(13f64),
                                      },
                                      sub_filters: vec![
-                                Filter {
-                                    connector: Some(
-                                        Connector::AND
-                                    ),
-                                    condition: Condition {
-                                        left: Operand::Column("student".to_owned()),
-                                        equality: Equality::EQ,
-                                        right: Operand::Boolean(true)
-                                    },
-                                    sub_filters: vec![
+                                        Filter {
+                                            connector: Some(
+                                                Connector::AND
+                                            ),
+                                            condition: Condition {
+                                                left: Operand::Column("student".to_owned()),
+                                                equality: Equality::EQ,
+                                                right: Operand::Boolean(true)
+                                            },
+                                            sub_filters: vec![]
+                                        },
                                         Filter {
                                             connector: Some(
                                                 Connector::OR
@@ -800,25 +802,12 @@ fn test_query() {
                                             condition: Condition {
                                                 left: Operand::Column("gender".to_owned()),
                                                 equality: Equality::EQ,
-                                                right: Operand::Column("M".to_owned())
+                                                right: Operand::Value("M".to_owned())
                                             },
                                             sub_filters: vec![]
                                         }
-                                    ]
-                                },
-                                
-                            ],
+                                    ],
                                  }],
-                   order_by: vec![Order {
-                                      operand: Operand::Column("age".to_owned()),
-                                      direction: Some(Direction::DESC),
-                                      nulls_where: None,
-                                  },
-                                  Order {
-                                      operand: Operand::Column("height".to_owned()),
-                                      direction: Some(Direction::ASC),
-                                      nulls_where: None,
-                                  }],
                    group_by: vec![Operand::Function(Function {
                                       function: "sum".to_owned(),
                                       params: vec![Operand::Column("age".to_owned())],
@@ -837,6 +826,16 @@ fn test_query() {
                                     },
                                     sub_filters: vec![],
                                 }],
+                   order_by: vec![Order {
+                                      operand: Operand::Column("age".to_owned()),
+                                      direction: Some(Direction::DESC),
+                                      nulls_where: None,
+                                  },
+                                  Order {
+                                      operand: Operand::Column("height".to_owned()),
+                                      direction: Some(Direction::ASC),
+                                      nulls_where: None,
+                                  }],
                    range: Some(Range::Limit(Limit {
                        limit: 100,
                        offset: Some(25),
@@ -851,8 +850,6 @@ fn test_query() {
                                    }],
                    ..Default::default()
                }),
-               query("age=lt.13&student=eq.true|gender=eq.M&group_by=sum(age),grade,\
-                      gender&having=min(age)=gt.13&order_by=age.desc,height.\
-                      asc&limit=100&offset=25&x=123&y=456".as_bytes()));
+               result);
 }
 
