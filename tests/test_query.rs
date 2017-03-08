@@ -10,7 +10,7 @@ use nom::IResult;
 fn test_limit_only(){
 	assert_eq!(
 		IResult::Done("".as_bytes(), 
-		Query{
+		Select{
 			range: Some(
 				Range::Limit(
 					Limit {
@@ -27,7 +27,7 @@ fn test_limit_only(){
 fn test_limit_and_offset(){
 	assert_eq!(
 		IResult::Done("".as_bytes(), 
-		Query{
+		Select{
 			range: Some(
 				Range::Limit(
 					Limit {
@@ -45,7 +45,7 @@ fn test_limit_and_offset(){
 fn test_filters(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     filters: vec![
                         Filter {
                             connector: None,
@@ -93,7 +93,7 @@ fn test_filters(){
 fn test_filter_orderby(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     filters: vec![
                         Filter {
                             connector: None,
@@ -146,7 +146,7 @@ fn test_filter_orderby(){
 fn test_filter_groupby_orderby(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     filters: vec![
                         Filter {
                             connector: None,
@@ -210,7 +210,7 @@ fn test_filter_groupby_orderby(){
 fn test_equations_filter_groupby_orderby(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     filters: vec![
                         Filter {
                             connector: None,
@@ -278,7 +278,7 @@ fn test_equations_filter_groupby_orderby(){
 fn test_orderby(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     order_by: vec![Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None }],
                     ..Default::default()
                 }
@@ -290,7 +290,7 @@ fn test_orderby(){
 fn test_orderby_nullsfirst(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     order_by: vec![Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: Some(NullsWhere::FIRST) }],
                     ..Default::default()
                 }
@@ -302,7 +302,7 @@ fn test_orderby_nullsfirst(){
 fn test_orderby2(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     order_by: vec![
                         Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None },
                         Order { operand: Operand::Column("grade".to_owned()), direction: Some(Direction::DESC), nulls_where: None }
@@ -319,7 +319,7 @@ fn test_orderby2(){
 fn test_groupby(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     group_by: vec![Operand::Column("height".to_owned())],
                     ..Default::default()
                 }
@@ -332,7 +332,7 @@ fn test_groupby(){
 fn test_groupby2(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     group_by: vec![
                         Operand::Function(Function { 
                                             function: "avg".to_owned(), 
@@ -353,7 +353,7 @@ fn test_groupby2(){
 fn test_groupby_orderby(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     order_by: vec![
                         Order { operand: Operand::Column("height".to_owned()), direction: Some(Direction::ASC), nulls_where: None },
                         Order { operand: Operand::Column("grade".to_owned()), direction: Some(Direction::DESC), nulls_where: None }
@@ -380,7 +380,7 @@ fn test_groupby_orderby(){
 fn test_equations_filter_groupby_having_orderby(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     filters: vec![
                         Filter {
                             connector: None,
@@ -463,7 +463,7 @@ fn test_equations_filter_groupby_having_orderby(){
 fn test_equations_filter_groupby_having_orderby_page(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     filters: vec![
                         Filter {
                             connector: None,
@@ -546,7 +546,7 @@ fn test_equations_filter_groupby_having_orderby_page(){
 fn test_equations_filter_groupby_having_orderby_limit(){
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     filters: vec![
                         Filter {
                             connector: None,
@@ -634,7 +634,7 @@ fn test_equations_from_join_filter_groupby_having_orderby_limit(){
     
     assert_eq!(
         	IResult::Done("".as_bytes(), 
-                Query {
+                Select {
                     from: vec![
                             Operand::Column(
                                 "bazaar.person".to_owned()

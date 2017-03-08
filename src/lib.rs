@@ -119,7 +119,7 @@ pub struct Filter {
 #[derive(PartialEq)]
 #[derive(Default)]
 #[derive(Clone)]
-pub struct Query {
+pub struct Select {
     pub from: Vec<Operand>,
     pub join: Vec<Join>,
     pub filters: Vec<Filter>,
@@ -300,22 +300,27 @@ named!(pub number<f64>,
 
 named!(pub operand <Operand>,
    alt_complete!(
-        float => {|f| Operand::Number(f as f64)} |
         boolean => {|b| Operand::Boolean(b) } |
-        //column => {|c:&str| Operand::Column(c.to_string())} | //NOTE: assume the right value to be value, and the left to be always column
         function => {|f| Operand::Function(f)} |
-        value => {|v:&str| {
-            match column(v.as_bytes()){
-                IResult::Done(rest,col) => {
-                    if rest == "".as_bytes(){
-                        Operand::Column(col.to_string())
-                    }else{
-                        Operand::Value(v.to_string()) 
+        value => {|v:&str| 
+            {
+                match f64::from_str(v){
+                    Ok(f) => Operand::Number(f as f64),
+                    Err(_) => {
+                        match column(v.as_bytes()){
+                            IResult::Done(rest,col) => {
+                                if rest == "".as_bytes(){
+                                    Operand::Column(col.to_string())
+                                }else{
+                                    Operand::Value(v.to_string()) 
+                                }
+                            },
+                            _ => Operand::Value(v.to_string())
+                        }
                     }
-                },
-                _ => Operand::Value(v.to_string())
-            }
-        }} 
+                }
+            } 
+        }
    ) 
 );
 
@@ -538,7 +543,7 @@ named!(pub range <Range>,
     )
 );
 
-named!(pub query <Query>,
+named!(pub query <Select>,
     do_parse!(
         fr: opt!(from) >>
         j: complete!(many0!(preceded!(opt!(tag!("&")),join))) >>
@@ -547,8 +552,8 @@ named!(pub query <Query>,
         h: opt!(preceded!(tag!("&"), having)) >>
         ord: opt!(preceded!(tag!("&"), order_by))>>
         rng: opt!(preceded!(tag!("&"), range)) >>
-        eq: opt!(preceded!(tag!("&"), separated_list!(tag!("&"),equation))) >>
-        (Query{
+        eq: many0!(preceded!(opt!(tag!("&")), equation)) >>
+        (Select{
             from: match fr{Some(fr)=>fr,None=>vec![]},
             join: j,
             filters: filtr,
@@ -556,7 +561,7 @@ named!(pub query <Query>,
             having: match h{Some(h)=>h,None=>vec![]},
             order_by: match ord{Some(ord)=>ord,None=>vec![]},
             range: rng,
-            equations: match eq{Some(eq)=>eq,None=>vec![]}
+            equations: eq,
         }
         )
     )
@@ -568,7 +573,7 @@ pub enum ParseError{
     NomError(String)
 }
 
-pub fn parse(arg: &str) -> Result<Query, ParseError>{
+pub fn parse(arg: &str) -> Result<Select, ParseError>{
     match query(arg.as_bytes()){
         IResult::Done(_,query) =>
             Ok(query),
@@ -641,6 +646,33 @@ fn test_table_column() {
 fn test_from() {
     assert_eq!(IResult::Done("".as_bytes(), vec![Operand::Column("person".to_owned())]),
                from("from=person".as_bytes()));
+}
+
+#[test]
+fn test_equation_preceded() {
+    assert_eq!(IResult::Done("".as_bytes(), Select{equations: vec![
+                            Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(1f64) }, 
+                        ],..Default::default()}),
+               query("&x=1".as_bytes()));
+}
+
+
+#[test]
+fn test_equation() {
+    assert_eq!(IResult::Done("".as_bytes(), Select{
+                    equations: vec![
+                            Equation { left: Operand::Column("x".to_owned()), right: Operand::Number(1f64) }, 
+                    ] ,..Default::default()}),
+               query("x=1".as_bytes()));
+}
+
+#[test]
+fn test_equation_focused_record() {
+    assert_eq!(IResult::Done("".as_bytes(), Select{
+                    equations: vec![
+                            Equation { left: Operand::Column("focused_record".to_owned()), right: Operand::Value("3e51d5f9-5bff-4664-9946-47bf37973636".to_string()) }, 
+                    ] ,..Default::default()}),
+               query("focused_record=3e51d5f9-5bff-4664-9946-47bf37973636".as_bytes()));
 }
 
 #[test]
@@ -775,7 +807,7 @@ fn test_query() {
     println!("{}\n", arg);
     let result = query(arg.as_bytes());
     println!("{:#?}\n",result);
-    assert_eq!(IResult::Done("".as_bytes(), Query {
+    assert_eq!(IResult::Done("".as_bytes(), Select {
                    filters: vec![Filter {
                                      connector: None,
                                      condition: Condition {
