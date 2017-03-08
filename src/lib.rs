@@ -1,8 +1,11 @@
+#![deny(warnings)]
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
 #[macro_use]
 extern crate nom;
 
 use std::str::{self,FromStr};
-use nom::{IResult,digit,alphanumeric,anychar,is_alphanumeric};
+use nom::{IResult,digit};
 
 #[derive(Debug)]
 #[derive(PartialEq)]
@@ -29,20 +32,6 @@ pub enum Operand {
     Number(f64),
     Boolean(bool),
     Value(String),
-}
-
-impl Operand{
-    fn value_append(self, s:&str)->Self{
-        match self{
-            Operand::Value(value) => {
-                Operand::Value(format!("{}{}",value,s))
-            }
-            Operand::Column(value) => {
-                Operand::Value(format!("{}{}",value,s))
-            }
-            _ => self
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -411,7 +400,7 @@ fn fold_conditions(initial: Condition, remainder: Vec<(Connector, Condition)>) -
 
 fn fold_filters(initial: Filter, remainder: Vec<(Connector, Filter)>) -> Filter{
     let mut sub_filters = vec![];
-    for (conn, filtr) in remainder{
+    for (_, filtr) in remainder{
         sub_filters.push(filtr);
     }
     let mut filter = initial.to_owned();
@@ -584,7 +573,7 @@ pub fn parse(arg: &str) -> Result<Select, ParseError>{
     }
 }
 
-
+/*
 named!(unsigned_float <f64>, map_res!(
   map_res!(
     recognize!(
@@ -609,6 +598,7 @@ named!(float <f64>, map!(
   }
 ));
 
+*/
 
 
 
