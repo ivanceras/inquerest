@@ -1,14 +1,14 @@
 [root]
 name = "inquerest"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
- "nom 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nom 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "nom"
-version = "2.0.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
-"checksum nom 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ffc564b2727f758993db55d4ffed0d84bbd7f387a66509516768c8f786bb0b10"
+"checksum nom 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e5d4598834859fedb9a0a69d5b862a970e77982a92f544d547257a4d49469067"
