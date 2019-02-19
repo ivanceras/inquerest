@@ -349,9 +349,9 @@ named!(pub nulls_where <NullsWhere>,
     )
 );
 
-/// hard to distinguest `column.direction` from `table.column`
-/// i.e: `person.age` and `age.desc`
-/// use strict `column_only` instead, which doesn't include `.`
+// hard to distinguest `column.direction` from `table.column`
+// i.e: `person.age` and `age.desc`
+// use strict `column_only` instead, which doesn't include `.`
 named!(pub order <Order>,
     do_parse!(
         col: column_only >>
