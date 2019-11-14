@@ -15,7 +15,7 @@ pub struct Equation {
 
 #[derive(Debug, PartialEq)]
 pub struct Function {
-    pub function: String,
+    pub name: String,
     pub params: Vec<Operand>,
 }
 
@@ -65,19 +65,19 @@ pub struct Order {
 
 #[derive(Debug, PartialEq)]
 pub enum Equality {
-    Eq,    // = ,  eq
-    Neq,   // != , neq
-    Lt,    // <,  lt
-    Lte,   // <=, lte
-    Gt,    // >, gt
-    Gte,   // >=, gte
-    In,    // IN, in
-    NotIn, // NOT IN, not_in
-    Is,    // IS, is
-    IsNot, // IS NOT, is_not
-    Like,  // LIKE, like
-    Ilike, // ILIKE case insensitive like, postgresql specific
-    St,    // Starts with, which will become ILIKE 'value%'
+    Eq,     // = ,  eq
+    Neq,    // != , neq
+    Lt,     // <,  lt
+    Lte,    // <=, lte
+    Gt,     // >, gt
+    Gte,    // >=, gte
+    In,     // IN, in
+    NotIn,  // NOT IN, not_in
+    Is,     // IS, is
+    IsNot,  // IS NOT, is_not
+    Like,   // LIKE, like
+    Ilike,  // ILIKE case insensitive like, postgresql specific
+    Starts, // Starts with, which will become ILIKE 'value%'
 }
 
 #[derive(Debug, PartialEq)]
@@ -230,9 +230,51 @@ fn connector<'a>() -> Parser<'a, char, Connector> {
     sym('|').map(|_| Connector::Or) | sym('&').map(|_| Connector::And)
 }
 
+fn equality<'a>() -> Parser<'a, char, Equality> {
+    tag("eq").map(|_| Equality::Eq)
+        | tag("neq").map(|_| Equality::Neq)
+        | tag("lte").map(|_| Equality::Lte)
+        | tag("lt").map(|_| Equality::Lt)
+        | tag("gte").map(|_| Equality::Gte)
+        | tag("gt").map(|_| Equality::Gt)
+        | tag("in").map(|_| Equality::In)
+        | tag("not_in").map(|_| Equality::NotIn)
+        | tag("is_not").map(|_| Equality::IsNot)
+        | tag("like").map(|_| Equality::Like)
+        | tag("ilike").map(|_| Equality::Ilike)
+        | tag("starts").map(|_| Equality::Starts)
+}
+
+fn operand<'a>() -> Parser<'a, char, Operand> {
+    column().map(Operand::Column) | function().map(Operand::Function) | value().map(Operand::Value)
+}
+
+fn operands<'a>() -> Parser<'a, char, Vec<Operand>> {
+    list(call(operand), space() - sym(',') - space())
+}
+
+fn function<'a>() -> Parser<'a, char, Function> {
+    (ident() - sym('(') + operands() - sym(')')).map(|(name, params)| Function { name, params })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_function() {
+        let input = to_chars("max(seq_no)");
+        let ret = function().parse(&input).expect("must be parsed");
+        assert_eq!(
+            ret,
+            Function {
+                name: "max".into(),
+                params: vec![Operand::Column(Column {
+                    name: "seq_no".into()
+                })]
+            }
+        );
+    }
 
     #[test]
     fn test_column() {
@@ -244,6 +286,31 @@ mod tests {
                 name: "product_id".into()
             }
         );
+    }
+
+    #[test]
+    fn test_value_bool() {
+        let input = to_chars("true");
+        let ret = value().parse(&input).expect("must be parsed");
+        assert_eq!(ret, Value::Bool(true));
+    }
+    #[test]
+    fn test_value_bool2() {
+        let input = to_chars("false");
+        let ret = value().parse(&input).expect("must be parsed");
+        assert_eq!(ret, Value::Bool(false));
+    }
+    #[test]
+    fn test_value_number() {
+        let input = to_chars("0.1312312");
+        let ret = value().parse(&input).expect("must be parsed");
+        assert_eq!(ret, Value::Number(0.1312312));
+    }
+    #[test]
+    fn test_value_number2() {
+        let input = to_chars("3.14159");
+        let ret = value().parse(&input).expect("must be parsed");
+        assert_eq!(ret, Value::Number(3.14159));
     }
 
     #[test]
