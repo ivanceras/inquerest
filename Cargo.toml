@@ -1,5 +1,4 @@
 [package]
-
 name = "inquerest"
 version = "0.2.2"
 authors = [ "Jovansonlee Cesar<ivanceras@gmail.com>" ]
@@ -8,7 +7,8 @@ description = "A complex url parameter parser for rest filter queries"
 readme = "README.md"
 repository = "https://github.com/ivanceras/inquerest"
 documentation = "https://docs.rs/inquerest"
+edition = "2018"
 keywords = ["url", "param", "parser", "rest", "query", ]
 
 [dependencies]
-nom = "2"
+pom = "3.0.2"
