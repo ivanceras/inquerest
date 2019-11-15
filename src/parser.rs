@@ -63,8 +63,9 @@ pub struct Order {
     pub nulls_where: Option<NullsWhere>,
 }
 
+//TODO: rename to Operator, BinaryOperator
 #[derive(Debug, PartialEq)]
-pub enum Equality {
+pub enum Operator {
     Eq,     // = ,  eq
     Neq,    // != , neq
     Lt,     // <,  lt
@@ -83,7 +84,7 @@ pub enum Equality {
 #[derive(Debug, PartialEq)]
 pub struct Condition {
     pub left: Operand,
-    pub equality: Equality,
+    pub equality: Operator,
     pub right: Operand,
 }
 
@@ -234,19 +235,19 @@ fn connector<'a>() -> Parser<'a, char, Connector> {
     sym('|').map(|_| Connector::Or) | sym('&').map(|_| Connector::And)
 }
 
-fn equality<'a>() -> Parser<'a, char, Equality> {
-    tag("eq").map(|_| Equality::Eq)
-        | tag("neq").map(|_| Equality::Neq)
-        | tag("lte").map(|_| Equality::Lte)
-        | tag("lt").map(|_| Equality::Lt)
-        | tag("gte").map(|_| Equality::Gte)
-        | tag("gt").map(|_| Equality::Gt)
-        | tag("in").map(|_| Equality::In)
-        | tag("not_in").map(|_| Equality::NotIn)
-        | tag("is_not").map(|_| Equality::IsNot)
-        | tag("like").map(|_| Equality::Like)
-        | tag("ilike").map(|_| Equality::Ilike)
-        | tag("starts").map(|_| Equality::Starts)
+fn equality<'a>() -> Parser<'a, char, Operator> {
+    tag("eq").map(|_| Operator::Eq)
+        | tag("neq").map(|_| Operator::Neq)
+        | tag("lte").map(|_| Operator::Lte)
+        | tag("lt").map(|_| Operator::Lt)
+        | tag("gte").map(|_| Operator::Gte)
+        | tag("gt").map(|_| Operator::Gt)
+        | tag("in").map(|_| Operator::In)
+        | tag("not_in").map(|_| Operator::NotIn)
+        | tag("is_not").map(|_| Operator::IsNot)
+        | tag("like").map(|_| Operator::Like)
+        | tag("ilike").map(|_| Operator::Ilike)
+        | tag("starts").map(|_| Operator::Starts)
 }
 
 fn operand<'a>() -> Parser<'a, char, Operand> {
@@ -266,9 +267,62 @@ fn function<'a>() -> Parser<'a, char, Function> {
     (ident() - sym('(') + operands() - sym(')')).map(|(name, params)| Function { name, params })
 }
 
+// age=gt.42
+// name=allan
+fn condition<'a>() -> Parser<'a, char, Condition> {
+    (operand() - sym('=') + (equality() - sym('.')).opt() + operand()).map(
+        |((left, equality), right)| Condition {
+            left,
+            equality: equality.unwrap_or(Operator::Eq),
+            right,
+        },
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_condition_gt() {
+        let input = to_chars("age=gt.42");
+        let ret = condition().parse(&input).expect("must be parsed");
+        assert_eq!(
+            ret,
+            Condition {
+                left: Operand::Column(Column { name: "age".into() }),
+                equality: Operator::Gt,
+                right: Operand::Value(Value::Number(42.0))
+            }
+        );
+    }
+    #[test]
+    fn test_condition_lte() {
+        let input = to_chars("age=lte.42");
+        let ret = condition().parse(&input).expect("must be parsed");
+        assert_eq!(
+            ret,
+            Condition {
+                left: Operand::Column(Column { name: "age".into() }),
+                equality: Operator::Lte,
+                right: Operand::Value(Value::Number(42.0))
+            }
+        );
+    }
+
+    #[test]
+    fn test_condition_default_eq() {
+        let input = to_chars("age=42");
+        let ret = condition().parse(&input).expect("must be parsed");
+        assert_eq!(
+            ret,
+            Condition {
+                left: Operand::Column(Column { name: "age".into() }),
+                equality: Operator::Eq,
+                right: Operand::Value(Value::Number(42.0))
+            }
+        );
+    }
 
     #[test]
     fn test_function() {
