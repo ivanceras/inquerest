@@ -84,15 +84,14 @@ pub enum Operator {
 #[derive(Debug, PartialEq)]
 pub struct Condition {
     pub left: Operand,
-    pub equality: Operator,
+    pub operator: Operator,
     pub right: Operand,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Filter {
-    pub connector: Option<Connector>,
-    pub condition: Condition,
-    pub sub_filters: Vec<Filter>,
+    pub left: Condition,
+    pub right: Option<(Connector, Condition)>,
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -235,7 +234,7 @@ fn connector<'a>() -> Parser<'a, char, Connector> {
     sym('|').map(|_| Connector::Or) | sym('&').map(|_| Connector::And)
 }
 
-fn equality<'a>() -> Parser<'a, char, Operator> {
+fn operator<'a>() -> Parser<'a, char, Operator> {
     tag("eq").map(|_| Operator::Eq)
         | tag("neq").map(|_| Operator::Neq)
         | tag("lte").map(|_| Operator::Lte)
@@ -267,21 +266,53 @@ fn function<'a>() -> Parser<'a, char, Function> {
     (ident() - sym('(') + operands() - sym(')')).map(|(name, params)| Function { name, params })
 }
 
-// age=gt.42
-// name=allan
+/// Example:
+/// age=gt.42
+/// name=allan
 fn condition<'a>() -> Parser<'a, char, Condition> {
-    (operand() - sym('=') + (equality() - sym('.')).opt() + operand()).map(
-        |((left, equality), right)| Condition {
+    (operand() - sym('=') + (operator() - sym('.')).opt() + operand()).map(
+        |((left, operator), right)| Condition {
             left,
-            equality: equality.unwrap_or(Operator::Eq),
+            operator: operator.unwrap_or(Operator::Eq),
             right,
         },
     )
 }
 
+/// Example: age=gt.42&&is_active=true
+fn filter<'a>() -> Parser<'a, char, Filter> {
+    (condition() + (connector() + condition()).opt()).map(|(left, right)| Filter { left, right })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_filter() {
+        let input = to_chars("age=gt.42&is_active=true");
+        let ret = filter().parse(&input).expect("must be parsed");
+        assert_eq!(
+            ret,
+            Filter {
+                left: Condition {
+                    left: Operand::Column(Column { name: "age".into() }),
+                    operator: Operator::Gt,
+                    right: Operand::Value(Value::Number(42.0))
+                },
+                right: Some((
+                    Connector::And,
+                    Condition {
+                        left: Operand::Column(Column {
+                            name: "is_active".into()
+                        }),
+                        operator: Operator::Eq,
+                        right: Operand::Value(Value::Bool(true))
+                    }
+                ))
+            }
+        );
+    }
 
     #[test]
     fn test_condition_gt() {
@@ -291,7 +322,7 @@ mod tests {
             ret,
             Condition {
                 left: Operand::Column(Column { name: "age".into() }),
-                equality: Operator::Gt,
+                operator: Operator::Gt,
                 right: Operand::Value(Value::Number(42.0))
             }
         );
@@ -304,7 +335,7 @@ mod tests {
             ret,
             Condition {
                 left: Operand::Column(Column { name: "age".into() }),
-                equality: Operator::Lte,
+                operator: Operator::Lte,
                 right: Operand::Value(Value::Number(42.0))
             }
         );
@@ -318,7 +349,7 @@ mod tests {
             ret,
             Condition {
                 left: Operand::Column(Column { name: "age".into() }),
-                equality: Operator::Eq,
+                operator: Operator::Eq,
                 right: Operand::Value(Value::Number(42.0))
             }
         );
