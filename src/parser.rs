@@ -219,8 +219,12 @@ fn bool<'a>() -> Parser<'a, char, bool> {
     tag("true").map(|_| true) | tag("false").map(|_| false)
 }
 
-fn value<'a>() -> Parser<'a, char, Value> {
+fn null<'a>() -> Parser<'a, char, Value> {
     tag("null").map(|_| Value::Null)
+}
+
+fn value<'a>() -> Parser<'a, char, Value> {
+    null()
         | bool().map(|v| Value::Bool(v))
         | number().map(|n| Value::Number(n))
         | string().map(|s| Value::String(s))
@@ -246,7 +250,12 @@ fn equality<'a>() -> Parser<'a, char, Equality> {
 }
 
 fn operand<'a>() -> Parser<'a, char, Operand> {
-    column().map(Operand::Column) | function().map(Operand::Function) | value().map(Operand::Value)
+    null().map(Operand::Value)
+        | bool().map(|v| Operand::Value(Value::Bool(v)))
+        | number().map(|v| Operand::Value(Value::Number(v)))
+        | column().map(Operand::Column)
+        | function().map(Operand::Function)
+        | value().map(Operand::Value)
 }
 
 fn operands<'a>() -> Parser<'a, char, Vec<Operand>> {
@@ -325,5 +334,18 @@ mod tests {
         let input = to_chars("a string value\"pr'oduct_id");
         let ret = string().parse(&input).expect("must be parsed");
         assert_eq!(ret, "a string value\"pr\'oduct_id");
+    }
+
+    #[test]
+    fn test_bool_operand() {
+        let input = to_chars("true");
+        let ret = operand().parse(&input).expect("must be parsed");
+        assert_eq!(ret, Operand::Value(Value::Bool(true)));
+    }
+    #[test]
+    fn test_null_operand() {
+        let input = to_chars("null");
+        let ret = operand().parse(&input).expect("must be parsed");
+        assert_eq!(ret, Operand::Value(Value::Null));
     }
 }
