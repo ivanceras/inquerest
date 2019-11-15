@@ -89,9 +89,15 @@ pub struct Condition {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Filter {
-    pub left: Condition,
-    pub right: Option<(Connector, Condition)>,
+pub enum Filter {
+    Simple {
+        left: Condition,
+        right: Option<(Connector, Condition)>,
+    },
+    Complex {
+        left: Box<Filter>,
+        right: Option<(Connector, Box<Filter>)>,
+    },
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -279,22 +285,164 @@ fn condition<'a>() -> Parser<'a, char, Condition> {
     )
 }
 
-/// Example: age=gt.42&&is_active=true
-fn filter<'a>() -> Parser<'a, char, Filter> {
-    (condition() + (connector() + condition()).opt()).map(|(left, right)| Filter { left, right })
+/// Example: age=gt.42&is_active=true
+fn simple_filter<'a>() -> Parser<'a, char, Filter> {
+    (condition() + (connector() + condition()).opt())
+        .map(|(left, right)| Filter::Simple { left, right })
 }
+
+fn grouped_filter<'a>() -> Parser<'a, char, Filter> {
+    sym('(') * call(filter) - sym(')')
+}
+
+fn first_grouped_filter<'a>() -> Parser<'a, char, Filter> {
+    (grouped_filter() + (connector() + call(filter))).map(|(left, (connector, right))| {
+        Filter::Complex {
+            left: Box::new(left),
+            right: Some((connector, Box::new(right))),
+        }
+    })
+}
+
+fn filter<'a>() -> Parser<'a, char, Filter> {
+    first_grouped_filter() | grouped_filter() | simple_filter()
+}
+
+/// Example: age=gt.42&is_active=true|gender=eq."M"&class="Human"
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_filter() {
+    fn test_more_complex_filter2() {
+        let input = to_chars("(age=gt.42&is_active=true)|(gender=eq.'M'&class='Human')");
+        let ret = filter().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Filter::Complex {
+                left: Box::new(Filter::Simple {
+                    left: Condition {
+                        left: Operand::Column(Column { name: "age".into() }),
+                        operator: Operator::Gt,
+                        right: Operand::Value(Value::Number(42.0))
+                    },
+                    right: Some((
+                        Connector::And,
+                        Condition {
+                            left: Operand::Column(Column {
+                                name: "is_active".into()
+                            }),
+                            operator: Operator::Eq,
+                            right: Operand::Value(Value::Bool(true))
+                        }
+                    ))
+                }),
+                right: Some((
+                    Connector::Or,
+                    Box::new(Filter::Simple {
+                        left: Condition {
+                            left: Operand::Column(Column {
+                                name: "gender".into()
+                            }),
+                            operator: Operator::Eq,
+                            right: Operand::Value(Value::String("'M'".into()))
+                        },
+                        right: Some((
+                            Connector::And,
+                            Condition {
+                                left: Operand::Column(Column {
+                                    name: "class".into()
+                                }),
+                                operator: Operator::Eq,
+                                right: Operand::Value(Value::String("'Human'".into()))
+                            },
+                        ))
+                    })
+                ))
+            }
+        );
+    }
+
+    #[test]
+    fn test_complex_filter1() {
+        let input = to_chars("(age=gt.42&is_active=true)|gender=eq.'M'");
+        let ret = filter().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Filter::Complex {
+                left: Box::new(Filter::Simple {
+                    left: Condition {
+                        left: Operand::Column(Column { name: "age".into() }),
+                        operator: Operator::Gt,
+                        right: Operand::Value(Value::Number(42.0))
+                    },
+                    right: Some((
+                        Connector::And,
+                        Condition {
+                            left: Operand::Column(Column {
+                                name: "is_active".into()
+                            }),
+                            operator: Operator::Eq,
+                            right: Operand::Value(Value::Bool(true))
+                        }
+                    ))
+                }),
+                right: Some((
+                    Connector::Or,
+                    Box::new(Filter::Simple {
+                        left: Condition {
+                            left: Operand::Column(Column {
+                                name: "gender".into()
+                            }),
+                            operator: Operator::Eq,
+                            right: Operand::Value(Value::String("'M'".into()))
+                        },
+                        right: None,
+                    })
+                ))
+            }
+        );
+    }
+
+    #[test]
+    fn test_grouped_filter() {
+        let input = to_chars("(gender=eq.'M'&class='Human')");
+        let ret = filter().parse(&input).expect("must be parsed");
+        println!("ret: {:#?}", ret);
+        assert_eq!(
+            ret,
+            Filter::Simple {
+                left: Condition {
+                    left: Operand::Column(Column {
+                        name: "gender".into()
+                    }),
+                    operator: Operator::Eq,
+                    right: Operand::Value(Value::String("'M'".into()))
+                },
+                right: Some((
+                    Connector::And,
+                    Condition {
+                        left: Operand::Column(Column {
+                            name: "class".into()
+                        }),
+                        operator: Operator::Eq,
+                        right: Operand::Value(Value::String("'Human'".into()))
+                    }
+                ))
+            }
+        );
+    }
+
+    #[test]
+    fn test_filter_simple_filter_and() {
         let input = to_chars("age=gt.42&is_active=true");
         let ret = filter().parse(&input).expect("must be parsed");
         assert_eq!(
             ret,
-            Filter {
+            Filter::Simple {
                 left: Condition {
                     left: Operand::Column(Column { name: "age".into() }),
                     operator: Operator::Gt,
@@ -302,6 +450,31 @@ mod tests {
                 },
                 right: Some((
                     Connector::And,
+                    Condition {
+                        left: Operand::Column(Column {
+                            name: "is_active".into()
+                        }),
+                        operator: Operator::Eq,
+                        right: Operand::Value(Value::Bool(true))
+                    }
+                ))
+            }
+        );
+    }
+    #[test]
+    fn test_filter_simple_filteror() {
+        let input = to_chars("age=gt.42|is_active=true");
+        let ret = simple_filter().parse(&input).expect("must be parsed");
+        assert_eq!(
+            ret,
+            Filter::Simple {
+                left: Condition {
+                    left: Operand::Column(Column { name: "age".into() }),
+                    operator: Operator::Gt,
+                    right: Operand::Value(Value::Number(42.0))
+                },
+                right: Some((
+                    Connector::Or,
                     Condition {
                         left: Operand::Column(Column {
                             name: "is_active".into()
