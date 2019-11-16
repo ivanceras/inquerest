@@ -8,6 +8,43 @@ use utils::*;
 mod utils;
 
 #[derive(Debug, PartialEq)]
+pub struct Select {
+    pub from: FromTable,
+    pub filter: Option<Filter>,
+    pub group_by: Vec<Operand>,
+    pub having: Option<Filter>,
+    pub selection: Vec<Operand>, // column selection
+    pub order_by: Vec<Order>,
+    pub range: Option<Range>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FromTable {
+    pub from: Table,
+    pub join: Option<(JoinType, Box<FromTable>)>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Table {
+    name: String,
+}
+
+/// Only 3 join types is supported
+/// - left join
+///     product<-users
+/// - right join
+///     product->users
+/// - inner_join
+///     product-><-users
+///
+#[derive(Debug, PartialEq)]
+pub enum JoinType {
+    InnerJoin,
+    LeftJoin,
+    RightJoin,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Operand {
     Column(Column),
     Function(Function),
@@ -16,11 +53,6 @@ pub enum Operand {
 
 #[derive(Debug, PartialEq)]
 pub struct Column {
-    name: String,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Table {
     name: String,
 }
 
@@ -43,26 +75,7 @@ pub enum Connector {
     And,
     Or,
 }
-#[derive(Debug, PartialEq)]
-pub enum Direction {
-    Asc,
-    Desc,
-}
 
-#[derive(Debug, PartialEq)]
-pub enum NullsWhere {
-    First,
-    Last,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Order {
-    pub operand: Operand,
-    pub direction: Option<Direction>,
-    pub nulls_where: Option<NullsWhere>,
-}
-
-//TODO: rename to Operator, BinaryOperator
 #[derive(Debug, PartialEq)]
 pub enum Operator {
     Eq,     // = ,  eq
@@ -79,7 +92,6 @@ pub enum Operator {
     Ilike,  // ILIKE case insensitive like, postgresql specific
     Starts, // Starts with, which will become ILIKE 'value%'
 }
-
 #[derive(Debug, PartialEq)]
 pub struct Condition {
     pub left: Operand,
@@ -100,14 +112,28 @@ pub enum Filter {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Select {
-    pub from: FromTable,
-    pub filter: Option<Filter>,
-    pub group_by: Vec<Operand>,
-    pub having: Option<Filter>,
-    pub selection: Vec<Operand>, // column selection
-    pub order_by: Vec<Order>,
-    pub range: Option<Range>,
+pub struct Order {
+    pub operand: Operand,
+    pub direction: Option<Direction>,
+    pub nulls_where: Option<NullsWhere>,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Direction {
+    Asc,
+    Desc,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum NullsWhere {
+    First,
+    Last,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Range {
+    Page(Page),
+    Limit(Limit),
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -120,33 +146,6 @@ pub struct Page {
 pub struct Limit {
     pub limit: i64,
     pub offset: Option<i64>,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Range {
-    Page(Page),
-    Limit(Limit),
-}
-
-/// Only 3 join types is supported
-/// - left join
-///     product<-users
-/// - right join
-///     product->users
-/// - inner_join
-///     product-><-users
-///
-#[derive(Debug, PartialEq)]
-pub enum JoinType {
-    InnerJoin,
-    LeftJoin,
-    RightJoin,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct FromTable {
-    pub from: Table,
-    pub join: Option<(JoinType, Box<FromTable>)>,
 }
 
 fn space<'a>() -> Parser<'a, char, ()> {
