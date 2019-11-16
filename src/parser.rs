@@ -8,18 +8,6 @@ use utils::*;
 mod utils;
 
 #[derive(Debug, PartialEq)]
-pub struct Equation {
-    pub left: Operand,
-    pub right: Operand,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Function {
-    pub name: String,
-    pub params: Vec<Operand>,
-}
-
-#[derive(Debug, PartialEq)]
 pub enum Operand {
     Column(Column),
     Function(Function),
@@ -29,6 +17,17 @@ pub enum Operand {
 #[derive(Debug, PartialEq)]
 pub struct Column {
     name: String,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Table {
+    name: String,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Function {
+    pub name: String,
+    pub params: Vec<Operand>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -100,16 +99,15 @@ pub enum Filter {
     },
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq)]
 pub struct Select {
-    pub from: Vec<Operand>,
-    pub join: Vec<Join>,
-    pub filters: Vec<Filter>,
+    pub from: FromTable,
+    pub filter: Option<Filter>,
     pub group_by: Vec<Operand>,
-    pub having: Vec<Filter>,
+    pub having: Option<Filter>,
+    pub selection: Vec<Operand>, // column selection
     pub order_by: Vec<Order>,
     pub range: Option<Range>,
-    pub equations: Vec<Equation>,
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -130,33 +128,25 @@ pub enum Range {
     Limit(Limit),
 }
 
+/// Only 3 join types is supported
+/// - left join
+///     product<-users
+/// - right join
+///     product->users
+/// - inner_join
+///     product-><-users
+///
 #[derive(Debug, PartialEq)]
 pub enum JoinType {
-    Cross,
-    Inner,
-    Outer,
-    Natural,
-}
-#[derive(Debug, PartialEq)]
-pub enum Modifier {
-    Left,
-    Right,
-    Full,
+    InnerJoin,
+    LeftJoin,
+    RightJoin,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Join {
-    pub modifier: Option<Modifier>,
-    pub join_type: Option<JoinType>,
-    pub table: Operand,
-    pub column1: Vec<String>,
-    pub column2: Vec<String>,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Param {
-    Condition(Condition),
-    Equation(Equation),
+pub struct FromTable {
+    pub from: Table,
+    pub join: Option<(JoinType, Box<FromTable>)>,
 }
 
 fn space<'a>() -> Parser<'a, char, ()> {
@@ -219,6 +209,10 @@ fn string<'a>() -> Parser<'a, char, String> {
 
 fn column<'a>() -> Parser<'a, char, Column> {
     table_column_name().map(|name| Column { name })
+}
+
+fn table<'a>() -> Parser<'a, char, Table> {
+    table_column_name().map(|name| Table { name })
 }
 
 fn bool<'a>() -> Parser<'a, char, bool> {
@@ -308,11 +302,128 @@ fn filter<'a>() -> Parser<'a, char, Filter> {
     first_grouped_filter() | grouped_filter() | simple_filter()
 }
 
+fn from_table<'a>() -> Parser<'a, char, FromTable> {
+    (table() + (join_type() + call(from_table)).opt()).map(|(from, join)| FromTable {
+        from,
+        join: join.map(|(join_type, from_table)| (join_type, Box::new(from_table))),
+    })
+}
+
+fn join_type<'a>() -> Parser<'a, char, JoinType> {
+    tag("-><-").map(|_| JoinType::InnerJoin)
+        | tag("<-").map(|_| JoinType::LeftJoin)
+        | tag("->").map(|_| JoinType::RightJoin)
+}
+
 /// Example: age=gt.42&is_active=true|gender=eq."M"&class="Human"
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_from_right_join() {
+        let input = to_chars("product->users");
+        let ret = from_table().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            FromTable {
+                from: Table {
+                    name: "product".into()
+                },
+                join: Some((
+                    JoinType::RightJoin,
+                    Box::new(FromTable {
+                        from: Table {
+                            name: "users".into()
+                        },
+                        join: None,
+                    }),
+                ),),
+            }
+        );
+    }
+
+    #[test]
+    fn test_from_left_join() {
+        let input = to_chars("product<-users");
+        let ret = from_table().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            FromTable {
+                from: Table {
+                    name: "product".into()
+                },
+                join: Some((
+                    JoinType::LeftJoin,
+                    Box::new(FromTable {
+                        from: Table {
+                            name: "users".into()
+                        },
+                        join: None,
+                    }),
+                ),),
+            }
+        );
+    }
+
+    #[test]
+    fn test_from_inner_join() {
+        let input = to_chars("product-><-users");
+        let ret = from_table().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            FromTable {
+                from: Table {
+                    name: "product".into()
+                },
+                join: Some((
+                    JoinType::InnerJoin,
+                    Box::new(FromTable {
+                        from: Table {
+                            name: "users".into()
+                        },
+                        join: None,
+                    }),
+                ),),
+            }
+        );
+    }
+
+    #[test]
+    fn test_from_table() {
+        let input = to_chars("product->users<-customer");
+        let ret = from_table().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            FromTable {
+                from: Table {
+                    name: "product".into()
+                },
+                join: Some((
+                    JoinType::RightJoin,
+                    Box::new(FromTable {
+                        from: Table {
+                            name: "users".into()
+                        },
+                        join: Some((
+                            JoinType::LeftJoin,
+                            Box::new(FromTable {
+                                from: Table {
+                                    name: "customer".into()
+                                },
+                                join: None,
+                            }),
+                        ),),
+                    }),
+                ),),
+            }
+        );
+    }
 
     #[test]
     fn test_more_complex_filter2() {
