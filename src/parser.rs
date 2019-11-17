@@ -115,19 +115,12 @@ pub enum Filter {
 pub struct Order {
     pub operand: Operand,
     pub direction: Option<Direction>,
-    pub nulls_where: Option<NullsWhere>,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum Direction {
     Asc,
     Desc,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum NullsWhere {
-    First,
-    Last,
 }
 
 #[derive(Debug, PartialEq)]
@@ -159,9 +152,15 @@ fn ident<'a>() -> Parser<'a, char, String> {
         .map(|(ch1, rest_ch)| format!("{}{}", ch1, String::from_iter(rest_ch)))
 }
 
-/// table.column_name
-fn table_column_name<'a>() -> Parser<'a, char, String> {
+fn table_name<'a>() -> Parser<'a, char, String> {
     (ident() - sym('.') + ident()).map(|(table, column)| format!("{}.{}", table, column)) | ident()
+}
+
+/// column name can not be followed with direction: asc, desc
+fn column_name<'a>() -> Parser<'a, char, String> {
+    (ident() - sym('.') + ident() - -direction())
+        .map(|(table, column)| format!("{}.{}", table, column))
+        | ident()
 }
 
 /// a number including decimal
@@ -219,11 +218,11 @@ fn string<'a>() -> Parser<'a, char, String> {
 }
 
 fn column<'a>() -> Parser<'a, char, Column> {
-    table_column_name().map(|name| Column { name })
+    column_name().map(|name| Column { name })
 }
 
 fn table<'a>() -> Parser<'a, char, Table> {
-    table_column_name().map(|name| Table { name })
+    table_name().map(|name| Table { name })
 }
 
 fn bool<'a>() -> Parser<'a, char, bool> {
@@ -344,11 +343,53 @@ fn limit<'a>() -> Parser<'a, char, Limit> {
         .map(|(limit, offset)| Limit { limit, offset })
 }
 
+fn range<'a>() -> Parser<'a, char, Range> {
+    page().map(Range::Page) | limit().map(Range::Limit)
+}
+
+fn direction<'a>() -> Parser<'a, char, Direction> {
+    tag("asc").map(|_| Direction::Asc) | tag("desc").map(|_| Direction::Desc)
+}
+
+fn order<'a>() -> Parser<'a, char, Order> {
+    (operand() + (sym('.') * direction()).opt())
+        .map(|(operand, direction)| Order { operand, direction })
+}
+
 /// Example: age=gt.42&is_active=true|gender=eq."M"&class="Human"
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_order() {
+        let input = to_chars("score.desc");
+        let ret = order().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Order {
+                operand: Operand::Column(Column {
+                    name: "score".to_string()
+                }),
+                direction: Some(Direction::Desc)
+            }
+        );
+    }
+    #[test]
+    fn test_column_with_order() {
+        let input = to_chars("score.desc");
+        let ret = column().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Column {
+                name: "score".into()
+            }
+        )
+    }
+
     #[test]
     fn test_page_with_size() {
         let input = to_chars("page=2&page_size=10");
