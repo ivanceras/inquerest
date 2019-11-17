@@ -52,6 +52,12 @@ pub enum Operand {
 }
 
 #[derive(Debug, PartialEq)]
+pub struct OperandRename {
+    operand: Operand,
+    rename: Option<String>,
+}
+
+#[derive(Debug, PartialEq)]
 pub struct Column {
     name: String,
 }
@@ -158,8 +164,8 @@ fn table_name<'a>() -> Parser<'a, char, String> {
 
 /// column name can not be followed with direction: asc, desc
 fn column_name<'a>() -> Parser<'a, char, String> {
-    (ident() - sym('.') + ident() - -direction())
-        .map(|(table, column)| format!("{}.{}", table, column))
+    (ident() - -(sym('.') - direction())).map(|(column)| format!("{}", column))
+        | (ident() - sym('.') + ident()).map(|(table, column)| format!("{}.{}", table, column))
         | ident()
 }
 
@@ -263,9 +269,23 @@ fn operand<'a>() -> Parser<'a, char, Operand> {
     null().map(Operand::Value)
         | bool().map(|v| Operand::Value(Value::Bool(v)))
         | number().map(|v| Operand::Value(Value::Number(v)))
-        | column().map(Operand::Column)
         | function().map(Operand::Function)
+        | column().map(Operand::Column)
         | value().map(Operand::Value)
+}
+
+fn operands_with_renames<'a>() -> Parser<'a, char, Vec<OperandRename>> {
+    list(call(operand_rename), sym(','))
+}
+
+/// column=>new_column
+fn operand_rename<'a>() -> Parser<'a, char, OperandRename> {
+    (operand() + (tag("=>") * ident()).opt())
+        .map(|(operand, rename)| OperandRename { rename, operand })
+}
+
+fn operand_selection<'a>() -> Parser<'a, char, Vec<OperandRename>> {
+    sym('{') * operands_with_renames() - sym('}')
 }
 
 fn operands<'a>() -> Parser<'a, char, Vec<Operand>> {
@@ -308,6 +328,7 @@ fn first_grouped_filter<'a>() -> Parser<'a, char, Filter> {
     })
 }
 
+/// (age=lt.42&student=eq.true)|(gender=eq.M&class='Human')
 fn filter<'a>() -> Parser<'a, char, Filter> {
     first_grouped_filter() | grouped_filter() | simple_filter()
 }
@@ -329,6 +350,7 @@ fn page_size<'a>() -> Parser<'a, char, i64> {
     (tag("page_size") - sym('=')) * integer()
 }
 
+/// page=2&page_size=10
 fn page<'a>() -> Parser<'a, char, Page> {
     ((tag("page") - sym('=')) * integer() - sym('&') + page_size())
         .map(|(page, page_size)| Page { page, page_size })
@@ -338,6 +360,7 @@ fn offset<'a>() -> Parser<'a, char, i64> {
     (tag("offset") - sym('=')) * integer()
 }
 
+/// limit=10&offset=20
 fn limit<'a>() -> Parser<'a, char, Limit> {
     ((tag("limit") - sym('=')) * integer() + (sym('&') * offset()).opt())
         .map(|(limit, offset)| Limit { limit, offset })
@@ -351,16 +374,61 @@ fn direction<'a>() -> Parser<'a, char, Direction> {
     tag("asc").map(|_| Direction::Asc) | tag("desc").map(|_| Direction::Desc)
 }
 
+/// height.asc
 fn order<'a>() -> Parser<'a, char, Order> {
     (operand() + (sym('.') * direction()).opt())
         .map(|(operand, direction)| Order { operand, direction })
 }
 
-/// Example: age=gt.42&is_active=true|gender=eq."M"&class="Human"
+// person{name,age,class}?age=(gt.42&student=eq.true)|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gte.42&order_by=age.desc,height.asc&page=2&page_size=10
+//fn select<'a>() -> Parser<'a, char, Select> {}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_column_selection() {
+        let input = to_chars("{name,age,max(height)=>new_height,description,class}");
+        let ret = operand_selection().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            vec![
+                OperandRename {
+                    operand: Operand::Column(Column {
+                        name: "name".into()
+                    }),
+                    rename: None,
+                },
+                OperandRename {
+                    operand: Operand::Column(Column { name: "age".into() }),
+                    rename: None
+                },
+                OperandRename {
+                    operand: Operand::Function(Function {
+                        name: "max".into(),
+                        params: vec![Operand::Column(Column {
+                            name: "height".into()
+                        })]
+                    }),
+                    rename: Some("new_height".to_string()),
+                },
+                OperandRename {
+                    operand: Operand::Column(Column {
+                        name: "description".into()
+                    }),
+                    rename: None,
+                },
+                OperandRename {
+                    operand: Operand::Column(Column {
+                        name: "class".into()
+                    }),
+                    rename: None,
+                }
+            ]
+        )
+    }
 
     #[test]
     fn test_order() {
@@ -386,6 +454,19 @@ mod tests {
             ret,
             Column {
                 name: "score".into()
+            }
+        )
+    }
+
+    #[test]
+    fn test_column_with_not_order() {
+        let input = to_chars("score.something");
+        let ret = column().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Column {
+                name: "score.something".into()
             }
         )
     }
@@ -588,6 +669,48 @@ mod tests {
     }
 
     #[test]
+    fn test_complex_filter_with_many_parens() {
+        let input = to_chars("((age=gt.42&is_active=true)|(gender=eq.'M'))");
+        let ret = filter().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Filter::Complex {
+                left: Box::new(Filter::Simple {
+                    left: Condition {
+                        left: Operand::Column(Column { name: "age".into() }),
+                        operator: Operator::Gt,
+                        right: Operand::Value(Value::Number(42.0))
+                    },
+                    right: Some((
+                        Connector::And,
+                        Condition {
+                            left: Operand::Column(Column {
+                                name: "is_active".into()
+                            }),
+                            operator: Operator::Eq,
+                            right: Operand::Value(Value::Bool(true))
+                        }
+                    ))
+                }),
+                right: Some((
+                    Connector::Or,
+                    Box::new(Filter::Simple {
+                        left: Condition {
+                            left: Operand::Column(Column {
+                                name: "gender".into()
+                            }),
+                            operator: Operator::Eq,
+                            right: Operand::Value(Value::String("'M'".into()))
+                        },
+                        right: None,
+                    })
+                ))
+            }
+        );
+    }
+
+    #[test]
     fn test_complex_filter1() {
         let input = to_chars("(age=gt.42&is_active=true)|gender=eq.'M'");
         let ret = filter().parse(&input).expect("must be parsed");
@@ -762,6 +885,21 @@ mod tests {
                     name: "seq_no".into()
                 })]
             }
+        );
+    }
+
+    #[test]
+    fn test_function_operand() {
+        let input = to_chars("max(seq_no)");
+        let ret = operand().parse(&input).expect("must be parsed");
+        assert_eq!(
+            ret,
+            Operand::Function(Function {
+                name: "max".into(),
+                params: vec![Operand::Column(Column {
+                    name: "seq_no".into()
+                })]
+            })
         );
     }
 
