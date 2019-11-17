@@ -9,12 +9,12 @@ mod utils;
 
 #[derive(Debug, PartialEq)]
 pub struct Select {
-    pub from: FromTable,
+    pub from_table: FromTable,
     pub filter: Option<Filter>,
-    pub group_by: Vec<Operand>,
+    pub group_by: Option<Vec<Operand>>,
     pub having: Option<Filter>,
-    pub selection: Vec<Operand>, // column selection
-    pub order_by: Vec<Order>,
+    pub selection: Vec<OperandRename>, // column selection
+    pub order_by: Option<Vec<Order>>,
     pub range: Option<Range>,
 }
 
@@ -380,12 +380,38 @@ fn order<'a>() -> Parser<'a, char, Order> {
         .map(|(operand, direction)| Order { operand, direction })
 }
 
-// person{name,age,class}?age=(gt.42&student=eq.true)|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gte.42&order_by=age.desc,height.asc&page=2&page_size=10
-//fn select<'a>() -> Parser<'a, char, Select> {}
+/// person{name,age,class}?age=(gt.42&student=eq.true)|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gte.42&order_by=age.desc,height.asc&page=2&page_size=10
+fn select<'a>() -> Parser<'a, char, Select> {
+    (from_table() + operand_selection() - sym('?')
+        + filter().opt()
+        + (tag("group_by=") * list(call(operand), sym(','))).opt()
+        + (tag("having=") * filter()).opt()
+        + (tag("order_by=") * list(call(order), sym(','))).opt()
+        + range().opt())
+    .map(
+        |((((((from_table, selection), filter), group_by), having), order_by), range)| Select {
+            from_table,
+            filter,
+            group_by,
+            having,
+            selection,
+            order_by,
+            range,
+        },
+    )
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_select() {
+        let input = to_chars("person{name,age,class}?(age=gt.42&student=eq.true)|gender=eq.M&group_by=sum(age),grade,gender&having=min(age)=gte.42&order_by=age.desc,height.asc&page=2&page_size=10");
+        let ret = select().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        panic!();
+    }
 
     #[test]
     fn test_column_selection() {
