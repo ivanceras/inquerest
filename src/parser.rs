@@ -148,10 +148,12 @@ pub struct Limit {
     pub offset: Option<i64>,
 }
 
+/// any whitespace character
 fn space<'a>() -> Parser<'a, char, ()> {
     one_of(" \t\r\n").repeat(0..).discard()
 }
 
+/// a valid identifier
 fn ident<'a>() -> Parser<'a, char, String> {
     (is_a(alpha_or_underscore) + is_a(alphanum_or_underscore).repeat(0..))
         .map(|(ch1, rest_ch)| format!("{}{}", ch1, String::from_iter(rest_ch)))
@@ -162,6 +164,7 @@ fn table_column_name<'a>() -> Parser<'a, char, String> {
     (ident() - sym('.') + ident()).map(|(table, column)| format!("{}.{}", table, column)) | ident()
 }
 
+/// a number including decimal
 fn number<'a>() -> Parser<'a, char, f64> {
     let integer = one_of("123456789") - one_of("0123456789").repeat(0..) | sym('0');
     let frac = sym('.') + one_of("0123456789").repeat(1..);
@@ -173,6 +176,14 @@ fn number<'a>() -> Parser<'a, char, f64> {
         .convert(|s| f64::from_str(&s))
 }
 
+fn integer<'a>() -> Parser<'a, char, i64> {
+    let int = one_of("123456789") - one_of("0123456789").repeat(0..) | sym('0');
+    int.collect()
+        .map(String::from_iter)
+        .convert(|s| i64::from_str(&s))
+}
+
+/// quoted string literal
 fn quoted_string<'a>() -> Parser<'a, char, String> {
     let special_char = sym('\\')
         | sym('/')
@@ -200,6 +211,7 @@ fn quoted_string<'a>() -> Parser<'a, char, String> {
     string.map(|strings| strings.concat())
 }
 
+/// string with no quote
 fn string<'a>() -> Parser<'a, char, String> {
     let char_string = none_of("=&()").repeat(1..).map(String::from_iter);
     let string = char_string.repeat(0..);
@@ -314,11 +326,70 @@ fn join_type<'a>() -> Parser<'a, char, JoinType> {
         | tag("->").map(|_| JoinType::RightJoin)
 }
 
+fn page_size<'a>() -> Parser<'a, char, i64> {
+    (tag("page_size") - sym('=')) * integer()
+}
+
+fn page<'a>() -> Parser<'a, char, Page> {
+    ((tag("page") - sym('=')) * integer() - sym('&') + page_size())
+        .map(|(page, page_size)| Page { page, page_size })
+}
+
+fn offset<'a>() -> Parser<'a, char, i64> {
+    (tag("offset") - sym('=')) * integer()
+}
+
+fn limit<'a>() -> Parser<'a, char, Limit> {
+    ((tag("limit") - sym('=')) * integer() + (sym('&') * offset()).opt())
+        .map(|(limit, offset)| Limit { limit, offset })
+}
+
 /// Example: age=gt.42&is_active=true|gender=eq."M"&class="Human"
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn test_page_with_size() {
+        let input = to_chars("page=2&page_size=10");
+        let ret = page().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Page {
+                page: 2,
+                page_size: 10,
+            }
+        )
+    }
+
+    #[test]
+    fn test_limit() {
+        let input = to_chars("limit=10");
+        let ret = limit().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Limit {
+                limit: 10,
+                offset: None,
+            }
+        )
+    }
+
+    #[test]
+    fn test_limit_with_offset() {
+        let input = to_chars("limit=10&offset=20");
+        let ret = limit().parse(&input).expect("must be parsed");
+        println!("{:#?}", ret);
+        assert_eq!(
+            ret,
+            Limit {
+                limit: 10,
+                offset: Some(20),
+            }
+        )
+    }
 
     #[test]
     fn test_from_right_join() {
