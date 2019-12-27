@@ -11,4 +11,5 @@ edition = "2018"
 keywords = ["url", "param", "parser", "rest", "query", ]
 
 [dependencies]
-pom = "3.0.2"
+restq = { path = "../restq" }
+thiserror = "1.0.9"
