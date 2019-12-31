@@ -2,6 +2,12 @@
 
 Inquerest can parse complex url query into a SQL abstract syntax tree.
 
+Example this url:
+```rust
+ /person?age=lt.42&(student=eq.true|gender=eq.'M')&group_by=sum(age),grade,gender&having=min(age)=gt.42&order_by=age.desc,height.asc&page=20&page_size=100
+```
+will be parsed into:
+
 ```rust
 Select {
         from_table: FromTable {
@@ -163,5 +169,7 @@ attack. You need to validate the tables and columns if it is allowed to be acces
 user. You also need to extract the values yourself and supply it as a parameterized value into
 your ORM.
 
+##### Please support this project:
+[![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
 
 License: MIT
