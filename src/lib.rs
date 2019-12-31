@@ -1,3 +1,166 @@
+//! Inquerest can parse complex url query into a SQL abstract syntax tree.
+//!
+//!```rust
+//! Select {
+//!         from_table: FromTable {
+//!             from: Table {
+//!                 name: "person",
+//!             },
+//!             join: None,
+//!         },
+//!         filter: Some(
+//!             BinaryOperation(
+//!                 BinaryOperation {
+//!                     left: BinaryOperation(
+//!                         BinaryOperation {
+//!                             left: Column(
+//!                                 Column {
+//!                                     name: "age",
+//!                                 },
+//!                             ),
+//!                             operator: Lt,
+//!                             right: Value(
+//!                                 Number(
+//!                                     42.0,
+//!                                 ),
+//!                             ),
+//!                         },
+//!                     ),
+//!                     operator: And,
+//!                     right: Nested(
+//!                         BinaryOperation(
+//!                             BinaryOperation {
+//!                                 left: BinaryOperation(
+//!                                     BinaryOperation {
+//!                                         left: Column(
+//!                                             Column {
+//!                                                 name: "student",
+//!                                             },
+//!                                         ),
+//!                                         operator: Eq,
+//!                                         right: Value(
+//!                                             Bool(
+//!                                                 true,
+//!                                             ),
+//!                                         ),
+//!                                     },
+//!                                 ),
+//!                                 operator: Or,
+//!                                 right: BinaryOperation(
+//!                                     BinaryOperation {
+//!                                         left: Column(
+//!                                             Column {
+//!                                                 name: "gender",
+//!                                             },
+//!                                         ),
+//!                                         operator: Eq,
+//!                                         right: Value(
+//!                                             String(
+//!                                                 "M",
+//!                                             ),
+//!                                         ),
+//!                                     },
+//!                                 ),
+//!                             },
+//!                         ),
+//!                     ),
+//!                 },
+//!             ),
+//!         ),
+//!         group_by: Some(
+//!             [
+//!                 Function(
+//!                     Function {
+//!                         name: "sum",
+//!                         params: [
+//!                             Column(
+//!                                 Column {
+//!                                     name: "age",
+//!                                 },
+//!                             ),
+//!                         ],
+//!                     },
+//!                 ),
+//!                 Column(
+//!                     Column {
+//!                         name: "grade",
+//!                     },
+//!                 ),
+//!                 Column(
+//!                     Column {
+//!                         name: "gender",
+//!                     },
+//!                 ),
+//!             ],
+//!         ),
+//!         having: Some(
+//!             BinaryOperation(
+//!                 BinaryOperation {
+//!                     left: Function(
+//!                         Function {
+//!                             name: "min",
+//!                             params: [
+//!                                 Column(
+//!                                     Column {
+//!                                         name: "age",
+//!                                     },
+//!                                 ),
+//!                             ],
+//!                         },
+//!                     ),
+//!                     operator: Gt,
+//!                     right: Value(
+//!                         Number(
+//!                             42.0,
+//!                         ),
+//!                     ),
+//!                 },
+//!             ),
+//!         ),
+//!         projection: None,
+//!         order_by: Some(
+//!             [
+//!                 Order {
+//!                     expr: Column(
+//!                         Column {
+//!                             name: "age",
+//!                         },
+//!                     ),
+//!                     direction: Some(
+//!                         Desc,
+//!                     ),
+//!                 },
+//!                 Order {
+//!                     expr: Column(
+//!                         Column {
+//!                             name: "height",
+//!                         },
+//!                     ),
+//!                     direction: Some(
+//!                         Asc,
+//!                     ),
+//!                 },
+//!             ],
+//!         ),
+//!         range: Some(
+//!             Page(
+//!                 Page {
+//!                     page: 20,
+//!                     page_size: 100,
+//!                 },
+//!             ),
+//!         ),
+//!     }
+//! ```
+//! Which translate to the sql statement:
+//! ```sql
+//! SELECT * FROM person WHERE age < 42 AND (student = true OR gender = 'M') GROUP BY sum(age), grade, gender HAVING min(age) > 42 ORDER BY age DESC, height ASC LIMIT 100 OFFSET 1900 ROWS
+//! ```
+//! Note: However, you don't want to convert to the sql statement directly to avoid sql injection
+//! attack. You need to validate the tables and columns if it is allowed to be accessed by the
+//! user. You also need to extract the values yourself and supply it as a parameterized value into
+//! your ORM.
+//!
 pub use restq;
 
 pub use restq::{

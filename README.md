@@ -1,116 +1,167 @@
-## Inquerest
+# inquerest
 
-[![Latest Version](https://img.shields.io/crates/v/inquerest.svg?style=flat-square)](https://crates.io/crates/inquerest)
-[![Build Status](https://img.shields.io/travis/ivanceras/inquerest.svg?style=flat-square)](https://travis-ci.org/ivanceras/inquerest)
-[![Coverage Status](https://img.shields.io/coveralls/ivanceras/inquerest.svg?style=flat-square)](https://coveralls.io/github/ivanceras/inquerest)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](./LICENSE)
-[![Build status](https://ci.appveyor.com/api/projects/status/gu8t6gc5uxjfakge/branch/master?svg=true&style=flat-square)](https://ci.appveyor.com/project/ivanceras/inquerest/branch/master)
-
-A complex url parameter parser for rest filter queries
-
-
-### Example
-
-```
-age=lt.13&(student=eq.true|gender=eq.M)&group_by=sum(age),grade,gender&having=min(age)=gt.13&order_by=age.desc,height.asc&page=20&page_size=100&x=123&y=456
-
-```
-Will resolve into
+Inquerest can parse complex url query into a SQL abstract syntax tree.
 
 ```rust
-Query {
-        filters: [
-            Filter {
-                connector: None,
-                condition: Condition {
-                    left: Column("age"),
-                    equality: LT,
-                    right: Number(13)
-                },
-                subfilter: [
-                    Filter {
-                        connector: Some(AND),
-                        condition: Condition {
-                            left: Column("student"),
-                            equality: EQ,
-                            right: Boolean(true)
-                        },
-                        subfilter: [
-                            Filter {
-                                connector: Some(OR),
-                                condition: Condition {
-                                    left: Column("gender"),
-                                    equality: EQ,
-                                    right: Column("M")
+Select {
+        from_table: FromTable {
+            from: Table {
+                name: "person",
+            },
+            join: None,
+        },
+        filter: Some(
+            BinaryOperation(
+                BinaryOperation {
+                    left: BinaryOperation(
+                        BinaryOperation {
+                            left: Column(
+                                Column {
+                                    name: "age",
                                 },
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
-        group_by: [
-            Function(
-                Function {
-                    function: "sum",
-                    params: [Column("age")]
-                }
+                            ),
+                            operator: Lt,
+                            right: Value(
+                                Number(
+                                    42.0,
+                                ),
+                            ),
+                        },
+                    ),
+                    operator: And,
+                    right: Nested(
+                        BinaryOperation(
+                            BinaryOperation {
+                                left: BinaryOperation(
+                                    BinaryOperation {
+                                        left: Column(
+                                            Column {
+                                                name: "student",
+                                            },
+                                        ),
+                                        operator: Eq,
+                                        right: Value(
+                                            Bool(
+                                                true,
+                                            ),
+                                        ),
+                                    },
+                                ),
+                                operator: Or,
+                                right: BinaryOperation(
+                                    BinaryOperation {
+                                        left: Column(
+                                            Column {
+                                                name: "gender",
+                                            },
+                                        ),
+                                        operator: Eq,
+                                        right: Value(
+                                            String(
+                                                "M",
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            },
+                        ),
+                    ),
+                },
             ),
-            Column("grade"),
-            Column("gender")
-        ],
-        having: [
-            Filter {
-                connector: None,
-                condition: Condition {
+        ),
+        group_by: Some(
+            [
+                Function(
+                    Function {
+                        name: "sum",
+                        params: [
+                            Column(
+                                Column {
+                                    name: "age",
+                                },
+                            ),
+                        ],
+                    },
+                ),
+                Column(
+                    Column {
+                        name: "grade",
+                    },
+                ),
+                Column(
+                    Column {
+                        name: "gender",
+                    },
+                ),
+            ],
+        ),
+        having: Some(
+            BinaryOperation(
+                BinaryOperation {
                     left: Function(
                         Function {
-                            function: "min",
-                            params: [Column("age")]
-                        }
+                            name: "min",
+                            params: [
+                                Column(
+                                    Column {
+                                        name: "age",
+                                    },
+                                ),
+                            ],
+                        },
                     ),
-                    equality: GT,
-                    right: Number(13)
+                    operator: Gt,
+                    right: Value(
+                        Number(
+                            42.0,
+                        ),
+                    ),
                 },
-            }
-        ],
-        order_by: [
-            Order {
-                column: "age",
-                direction: DESC
-            },
-            Order {
-                column: "height",
-                direction: ASC
-            }
-        ],
-        range: Some(Page( 
-			Page{ page: 20, page_size:100 } 
-		)),
-        equations: [
-            Equation {
-                left: Column("x"),
-                right: Number(123)
-            },
-            Equation {
-                left: Column("y"),
-                right: Number(456)
-            }
-        ]
+            ),
+        ),
+        projection: None,
+        order_by: Some(
+            [
+                Order {
+                    expr: Column(
+                        Column {
+                            name: "age",
+                        },
+                    ),
+                    direction: Some(
+                        Desc,
+                    ),
+                },
+                Order {
+                    expr: Column(
+                        Column {
+                            name: "height",
+                        },
+                    ),
+                    direction: Some(
+                        Asc,
+                    ),
+                },
+            ],
+        ),
+        range: Some(
+            Page(
+                Page {
+                    page: 20,
+                    page_size: 100,
+                },
+            ),
+        ),
     }
-
 ```
-## More examples in
-
-* [examples](https://github.com/ivanceras/inquerest/tree/master/examples)
-* [tests](https://github.com/ivanceras/inquerest/tree/master/tests)
-
-Inspired by [Postgrest](https://github.com/begriffs/postgrest)  [Filter expressions](https://github.com/begriffs/postgrest/wiki/Routing)
-
-##Similar projects
-
-* [rustless/queryst](https://github.com/rustless/queryst)
+Which translate to the sql statement:
+```sql
+SELECT * FROM person WHERE age < 42 AND (student = true OR gender = 'M') GROUP BY sum(age), grade, gender HAVING min(age) > 42 ORDER BY age DESC, height ASC LIMIT 100 OFFSET 1900 ROWS
+```
+Note: However, you don't want to convert to the sql statement directly to avoid sql injection
+attack. You need to validate the tables and columns if it is allowed to be accessed by the
+user. You also need to extract the values yourself and supply it as a parameterized value into
+your ORM.
 
 
-If you like this library, please consider supporting the project on [Gratipay](https://gratipay.com/~ivanceras/). 
-
+License: MIT

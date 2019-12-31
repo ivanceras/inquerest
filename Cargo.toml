@@ -1,6 +1,6 @@
 [package]
 name = "inquerest"
-version = "0.2.2"
+version = "0.3.0"
 authors = [ "Jovansonlee Cesar<ivanceras@gmail.com>" ]
 license = "MIT"
 description = "A complex url parameter parser for rest filter queries"
