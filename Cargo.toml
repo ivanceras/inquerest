@@ -12,4 +12,5 @@ keywords = ["url", "param", "parser", "rest", "query", ]
 
 [dependencies]
 restq = { path = "../restq" }
+restq-http = { path = "../restq/crates/restq-http" }
 thiserror = "1.0.9"
