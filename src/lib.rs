@@ -1,6 +1,6 @@
 //! Inquerest can parse complex url query into a SQL abstract syntax tree.
 //!
-//!```rust
+//!```rust,ignore
 //! Select {
 //!         from_table: FromTable {
 //!             from: Table {
@@ -176,12 +176,14 @@ pub use restq::{
 /// Parse a path and query in a url to a Select AST
 /// Example:
 /// ```rust
+///     use inquerest::*;
+///
 ///     let url = "/person?age=lt.42&(student=eq.true|gender=eq.'M')&group_by=sum(age),grade,gender&having=min(age)=gt.42&order_by=age.desc,height.asc&page=20&page_size=100";
 ///     let query = inquerest::parse_query(url);
 ///     println!("query: {:#?}", query);
 ///     println!(
 ///         "sql query: {}",
-///         query.unwrap().into_statement(None).unwrap().to_string()
+///         query.unwrap().into_sql_statement(None).unwrap().to_string()
 ///     );
 /// ```
 pub fn parse_query(input: &str) -> Result<Select, Error> {
@@ -193,6 +195,8 @@ pub fn parse_query(input: &str) -> Result<Select, Error> {
 ///
 /// Example:
 /// ```rust
+///     use inquerest::*;
+///
 ///     let filter = "age=lt.42&(student=eq.true|gender=eq.'M')&group_by=sum(age),grade,gender&having=min(age)=gt.42&order_by=age.desc,height.asc&page=20&page_size=100";
 ///     let result = parse_filter(filter);
 ///     println!("filter_only: {:#?}", result);
