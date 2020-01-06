@@ -11,6 +11,6 @@ edition = "2018"
 keywords = ["url", "param", "parser", "rest", "query", ]
 
 [dependencies]
-restq = { path = "../restq" }
-restq-http = { path = "../restq/crates/restq-http" }
+restq = { version = "0.1.0" }
+restq-http = { version = "0.1.0" }
 thiserror = "1.0.9"

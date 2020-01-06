@@ -1,8 +1,8 @@
 //! Inquerest can parse complex url query into a SQL abstract syntax tree.
 //!
 //! Example this url:
-//! ```
-//!  /person?age=lt.42&(student=eq.true|gender=eq.'M')&group_by=sum(age),grade,gender&having=min(age)=gt.42&order_by=age.desc,height.asc&page=20&page_size=100
+//! ```no_run,ignore
+//! /person?age=lt.42&(student=eq.true|gender=eq.'M')&group_by=sum(age),grade,gender&having=min(age)=gt.42&order_by=age.desc,height.asc&page=20&page_size=100
 //! ```
 //! will be parsed into:
 //!
