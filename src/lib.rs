@@ -1,3 +1,4 @@
+#![deny(warnings)]
 //! Inquerest can parse complex url query into a SQL abstract syntax tree.
 //!
 //! Example this url:
@@ -172,13 +173,9 @@
 pub use restq;
 
 pub use restq::{
-    ast::{
-        Expr,
-        Select,
-    },
+    ast::{Expr, Select},
     parser::filter_expr,
-    to_chars,
-    Error,
+    to_chars, Error,
 };
 
 /// Parse a path and query in a url to a Select AST
@@ -196,7 +193,7 @@ pub use restq::{
 /// ```
 pub fn parse_query(input: &str) -> Result<Select, Error> {
     let input_chars = to_chars(input);
-    restq_http::parse_select_chars(&input_chars)
+    restq::parse_select_chars(&input_chars)
 }
 
 /// Parse the query in a url to an Expression
